@@ -1,0 +1,209 @@
+
+import { useState } from "react";
+import { useProjects } from "@/hooks/use-db-data";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+import { eq } from "drizzle-orm";
+
+const ProjectsAdmin = () => {
+    const { data: projects, loading } = useProjects();
+    const [isOpen, setIsOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<typeof schema.projects.$inferSelect | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Form state
+    const [number, setNumber] = useState("");
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [image, setImage] = useState("");
+    const [link, setLink] = useState("");
+
+    const resetForm = () => {
+        setNumber("");
+        setTitle("");
+        setDescription("");
+        setImage("");
+        setLink("");
+        setEditingItem(null);
+    };
+
+    const handleOpenChange = (open: boolean) => {
+        setIsOpen(open);
+        if (!open) resetForm();
+    };
+
+    const handleEdit = (item: typeof schema.projects.$inferSelect) => {
+        setEditingItem(item);
+        setNumber(item.number);
+        setTitle(item.title);
+        setDescription(item.description);
+        setImage(item.image);
+        setLink(item.link || "");
+        setIsOpen(true);
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!confirm("Are you sure you want to delete this project?")) return;
+
+        try {
+            await db.delete(schema.projects).where(eq(schema.projects.id, id));
+            toast.success("Project deleted");
+            window.location.reload();
+        } catch (e) {
+            toast.error("Failed to delete project");
+            console.error(e);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        try {
+            const values = { number, title, description, image, link };
+
+            if (editingItem) {
+                await db.update(schema.projects)
+                    .set(values)
+                    .where(eq(schema.projects.id, editingItem.id));
+                toast.success("Project updated");
+            } else {
+                await db.insert(schema.projects).values(values);
+                toast.success("Project created");
+            }
+
+            setIsOpen(false);
+            window.location.reload();
+        } catch (e) {
+            toast.error("Failed to save project");
+            console.error(e);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    if (loading) return <div>Loading...</div>;
+
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold">Projects</h1>
+                    <p className="text-muted-foreground">Manage your portfolio projects.</p>
+                </div>
+                <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <Plus size={16} className="mr-2" />
+                            Add Project
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                            <DialogTitle>{editingItem ? "Edit Project" : "Add Project"}</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="grid grid-cols-4 gap-4">
+                                <div className="space-y-2 col-span-1">
+                                    <Label>Number</Label>
+                                    <Input value={number} onChange={e => setNumber(e.target.value)} required placeholder="01" />
+                                </div>
+                                <div className="space-y-2 col-span-3">
+                                    <Label>Title</Label>
+                                    <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Project Name" />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Project Link</Label>
+                                <Input value={link} onChange={e => setLink(e.target.value)} placeholder="https://..." />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Image URL</Label>
+                                <div className="flex gap-2">
+                                    <Input value={image} onChange={e => setImage(e.target.value)} required placeholder="https://..." />
+                                </div>
+                                {image && (
+                                    <div className="mt-2 relative h-32 w-full overflow-hidden rounded-md border">
+                                        <img src={image} alt="Preview" className="object-cover w-full h-full opacity-80" />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Description</Label>
+                                <Textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Project details..." className="h-32" />
+                            </div>
+                            <DialogFooter>
+                                <Button type="submit" disabled={isLoading}>
+                                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Save
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+            </div>
+
+            <div className="border rounded-lg">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-16">#</TableHead>
+                            <TableHead className="w-16">Image</TableHead>
+                            <TableHead>Title</TableHead>
+                            <TableHead>Description</TableHead>
+                            <TableHead className="w-24 text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {projects.map((item) => (
+                            <TableRow key={item.id}>
+                                <TableCell className="font-medium text-muted-foreground">{item.number}</TableCell>
+                                <TableCell>
+                                    <div className="w-10 h-10 rounded overflow-hidden bg-muted">
+                                        <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                                    </div>
+                                </TableCell>
+                                <TableCell className="font-medium">{item.title}</TableCell>
+                                <TableCell className="truncate max-w-[300px] text-muted-foreground">{item.description}</TableCell>
+                                <TableCell className="text-right">
+                                    <div className="flex justify-end gap-2">
+                                        <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
+                                            <Pencil size={16} />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(item.id)}>
+                                            <Trash2 size={16} />
+                                        </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+    );
+};
+
+export default ProjectsAdmin;
