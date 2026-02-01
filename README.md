@@ -12,13 +12,13 @@ A dynamic, high-performance portfolio website built with modern web technologies
 
 ## Key Features
 
-### 🎨 Dynamic UI
+### Dynamic UI
 - **Hero Section**: Features rotating quotes with dynamic backgrounds managed via the database.
 - **Projects Grid**: Full-screen, responsive grid layout with hover effects, gradient overlays, and detailed modal views.
 - **Bookmarks**: Nested categorization system (Parent/Child categories) to organize resources.
 - **Dark Mode**: Fully supported system-wide dark/light theme toggle.
 
-### 🛠️ Admin Dashboard (`/admin`)
+### Admin Dashboard
 A protected backoffice to manage all portfolio content without touching code:
 - **Authentication**: Simple PIN-based login system.
 - **Quotes Manager**: Create, edit, and delete quotes and their background styles.
