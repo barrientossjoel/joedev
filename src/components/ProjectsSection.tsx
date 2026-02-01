@@ -37,6 +37,20 @@ export function ProjectsSection() {
                     <Eye size={20} /> View Details
                   </span>
                 </div>
+
+                {/* Direct Visit Link on Hover */}
+                {project.link && (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute top-4 right-4 z-30 p-2 bg-black/50 hover:bg-white/20 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm pointer-events-auto"
+                    onClick={(e) => e.stopPropagation()}
+                    title="Visit Project"
+                  >
+                    <ArrowUpRight size={20} />
+                  </a>
+                )}
               </div>
 
               {/* Text Content - Always Visible over image */}
