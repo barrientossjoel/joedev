@@ -148,7 +148,9 @@ const CategoryManager = ({ categories }: { categories: typeof schema.categories.
                         <TableBody>
                             {categories.map(cat => (
                                 <TableRow key={cat.id}>
-                                    <TableCell className="py-2 font-medium">{cat.name}</TableCell>
+                                    <TableCell className="py-2 font-medium">
+                                        {cat.name} <span className="text-muted-foreground font-normal text-xs ml-1">({cat.count} items)</span>
+                                    </TableCell>
                                     <TableCell className="py-2 text-muted-foreground text-xs">{getParentName(cat.parentId)}</TableCell>
                                     <TableCell className="py-2 text-right">
                                         <div className="flex justify-end gap-1">
