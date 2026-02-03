@@ -34,6 +34,7 @@ export const bookmarks = sqliteTable("bookmarks", {
     description: text("description"),
     count: integer("count").notNull(),
     image: text("image"),
+    video: text("video"),
     link: text("link"),
     categoryId: integer("category_id").references(() => categories.id),
 });

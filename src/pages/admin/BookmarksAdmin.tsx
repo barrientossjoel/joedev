@@ -191,7 +191,7 @@ const BookmarksAdmin = () => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [link, setLink] = useState("");
-    const [image, setImage] = useState("");
+    const [mediaUrl, setMediaUrl] = useState("");
     const [categoryId, setCategoryId] = useState<string>("");
     const [count, setCount] = useState(0);
 
@@ -199,7 +199,7 @@ const BookmarksAdmin = () => {
         setTitle("");
         setDescription("");
         setLink("");
-        setImage("");
+        setMediaUrl("");
         setCategoryId(selectedCategoryId ? selectedCategoryId.toString() : ""); // Pre-select current category
         setCount(0);
         setEditingItem(null);
@@ -222,7 +222,7 @@ const BookmarksAdmin = () => {
         setTitle(item.title);
         setDescription(item.description || "");
         setLink(item.link || "");
-        setImage(item.image || "");
+        setMediaUrl(item.video || item.image || "");
         setCategoryId(item.categoryId?.toString() || "");
         setCount(item.count);
         setIsOpen(true);
@@ -239,9 +239,6 @@ const BookmarksAdmin = () => {
 
             // Decrement category count if it had one
             if (item?.categoryId) {
-                // We fetch the current store to accurately decrement or just use sql increment
-                // For simplicity with this driver, read-modify-write is safer if sql operator issues arise,
-                // but sql`count - 1` is standard Drizzle.
                 const cat = categories.find(c => c.id === item.categoryId);
                 if (cat) {
                     await db.update(schema.categories)
@@ -258,17 +255,24 @@ const BookmarksAdmin = () => {
         }
     };
 
+    const isVideo = (url: string) => {
+        return /\.(mp4|webm|mov|mkv)(\?|$|#)/i.test(url);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
         try {
             const newCategoryId = categoryId ? parseInt(categoryId) : null;
+
+            const isVid = isVideo(mediaUrl);
             const values = {
                 title,
                 description,
                 link,
-                image,
+                image: isVid ? null : mediaUrl,
+                video: isVid ? mediaUrl : null,
                 count,
                 categoryId: newCategoryId
             };
@@ -447,13 +451,17 @@ const BookmarksAdmin = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label>Image URL</Label>
+                                        <Label>Media URL (Image or Video)</Label>
                                         <div className="flex gap-2">
-                                            <Input value={image} onChange={e => setImage(e.target.value)} placeholder="https://..." />
+                                            <Input value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} placeholder="https://... (.jpg, .png, .mp4, .webm)" />
                                         </div>
-                                        {image && (
-                                            <div className="mt-2 relative h-32 w-full overflow-hidden rounded-md border">
-                                                <img src={image} alt="Preview" className="object-cover w-full h-full opacity-80" />
+                                        {mediaUrl && (
+                                            <div className="mt-2 relative h-32 w-full overflow-hidden rounded-md border bg-muted flex items-center justify-center">
+                                                {isVideo(mediaUrl) ? (
+                                                    <video src={mediaUrl} className="max-h-full max-w-full" autoPlay muted loop playsInline />
+                                                ) : (
+                                                    <img src={mediaUrl} alt="Preview" className="object-cover w-full h-full opacity-80" />
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -496,9 +504,13 @@ const BookmarksAdmin = () => {
                                     filteredBookmarks.map((item) => (
                                         <TableRow key={item.id}>
                                             <TableCell>
-                                                {item.image ? (
-                                                    <div className="w-8 h-8 rounded overflow-hidden bg-muted">
-                                                        <img src={item.image} alt="" className="w-full h-full object-cover" />
+                                                {item.image || item.video ? (
+                                                    <div className="w-8 h-8 rounded overflow-hidden bg-muted flex items-center justify-center">
+                                                        {item.video ? (
+                                                            <video src={item.video} className="w-full h-full object-cover" muted />
+                                                        ) : (
+                                                            <img src={item.image!} alt="" className="w-full h-full object-cover" />
+                                                        )}
                                                     </div>
                                                 ) : (
                                                     <div className="w-8 h-8 rounded bg-muted flex items-center justify-center">

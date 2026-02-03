@@ -1,9 +1,45 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { List, ChevronLeft, ExternalLink } from "lucide-react";
 import { useBookmarks, useCategories, useCategoryCoverImages } from "@/hooks/use-db-data";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+
+const VideoPreview = ({ src }: { src: string }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            videoRef.current?.play().catch(() => { });
+          } else {
+            videoRef.current?.pause();
+          }
+        });
+      },
+      { threshold: 0.2 } // Play when 20% visible for better responsiveness
+    );
+
+    if (videoRef.current) {
+      observer.observe(videoRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      muted
+      loop
+      playsInline
+    />
+  );
+};
 
 const BookmarksSection = () => {
   const { data: categories } = useCategories();
@@ -187,9 +223,11 @@ const BookmarksSection = () => {
                       onClick={() => setMobileView({ type: 'detail-modal', item: bookmark })}
                       className="rounded-xl border border-border bg-card overflow-hidden hover:border-muted-foreground/50 transition-colors cursor-pointer group flex flex-col h-full"
                     >
-                      {/* Image area */}
+                      {/* Image/Video area */}
                       <div className="h-32 bg-muted/30 relative overflow-hidden shrink-0">
-                        {bookmark.image ? (
+                        {bookmark.video ? (
+                          <VideoPreview src={bookmark.video} />
+                        ) : bookmark.image ? (
                           <img
                             src={bookmark.image}
                             alt={bookmark.title}
@@ -239,7 +277,18 @@ const BookmarksSection = () => {
                     </DialogHeader>
                     {(mobileView as any).item && (
                       <div className="space-y-6">
-                        {(mobileView as any).item.image && (
+                        {(mobileView as any).item.video ? (
+                          <div className="rounded-md overflow-hidden border">
+                            <video
+                              src={(mobileView as any).item.video}
+                              className="w-full h-auto max-h-[400px] object-contain bg-background"
+                              controls
+                              autoPlay
+                              muted
+                              loop
+                            />
+                          </div>
+                        ) : (mobileView as any).item.image && (
                           <div className="rounded-md overflow-hidden border">
                             <img
                               src={(mobileView as any).item.image}

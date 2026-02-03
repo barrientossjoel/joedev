@@ -17,9 +17,9 @@ if (!url) {
 export default defineConfig({
     schema: "./src/db/schema.ts",
     out: "./drizzle",
-    dialect: "sqlite",
+    dialect: "turso",
     dbCredentials: {
         url: url!,
-        authToken: process.env.VITE_DATABASE_AUTH_TOKEN,
+        authToken: process.env.VITE_DATABASE_AUTH_TOKEN!,
     },
 });
