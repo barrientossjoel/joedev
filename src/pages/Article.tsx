@@ -21,6 +21,10 @@ const Article = () => {
 
     const article = writings.find((w) => w.slug === slug);
 
+    console.log("Slug param:", slug);
+    console.log("Writings count:", writings.length);
+    console.log("Found article:", article);
+
     if (!article) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center gap-4">
