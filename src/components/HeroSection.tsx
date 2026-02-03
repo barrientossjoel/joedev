@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuotes } from "@/hooks/use-db-data";
 
 const HeroSection = () => {
+  const { t } = useTranslation();
   const { data: quotes, loading } = useQuotes();
   const [currentQuote, setCurrentQuote] = useState<{ text: string, author: string, background?: string | null } | null>(null);
   const [fade, setFade] = useState(false);
@@ -48,15 +50,15 @@ const HeroSection = () => {
     <section id="home" className="min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-12 lg:px-20 max-w-5xl mx-auto w-full">
       <div className="animate-fade-in text-center w-full">
         <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-10">
-          Welcome to my page
+          {t("hero.welcome")}
         </h1>
 
         <div className="space-y-4 mb-16">
           <p className="text-muted-foreground text-base leading-relaxed">
-            Hi, I'm Joel, a freelance developer, athlete, visual artist, writer, and minimalist based in Buenos Aires, Argentina.
+            {t("hero.description1")}
           </p>
           <p className="text-muted-foreground text-base leading-relaxed">
-            I develop things as a Developer at Arcadia Interactive. Previously, I worked as a Senior Frontend Software Engineer at heycar, Frontend Software Engineer at Yemeksepeti, Fullstack Software Engineer at Sistas, Mobile Developer at Tanbula, and Specialist at Apple.
+            {t("hero.description2")}
           </p>
         </div>
 

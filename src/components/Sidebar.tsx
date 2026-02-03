@@ -1,4 +1,6 @@
 import { Home, PenLine, Compass, Sun, Bookmark, Github, Linkedin, type LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 
 interface NavItem {
@@ -8,11 +10,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { id: "home", icon: Home, label: "Home" },
-  { id: "writing", icon: PenLine, label: "Writing" },
-  { id: "journey", icon: Compass, label: "Journey" },
-  { id: "projects", icon: Sun, label: "Projects" },
-  { id: "bookmarks", icon: Bookmark, label: "Bookmarks" },
+  { id: "home", icon: Home, label: "sidebar.nav.home" },
+  { id: "writing", icon: PenLine, label: "sidebar.nav.writing" },
+  { id: "journey", icon: Compass, label: "sidebar.nav.journey" },
+  { id: "projects", icon: Sun, label: "sidebar.nav.projects" },
+  { id: "bookmarks", icon: Bookmark, label: "sidebar.nav.bookmarks" },
 ];
 
 interface SocialLink {
@@ -58,6 +60,7 @@ import { useProfile } from "@/hooks/use-db-data";
 
 const Sidebar = ({ activeSection, onNavigate }: SidebarProps) => {
   const { data: profile } = useProfile();
+  const { t } = useTranslation();
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-sidebar flex flex-col py-8 z-50 border-r border-sidebar-border">
@@ -77,7 +80,7 @@ const Sidebar = ({ activeSection, onNavigate }: SidebarProps) => {
           )}
         </div>
         <div>
-          <h3 className="text-foreground font-medium text-sm">{profile?.name || "Loading..."}</h3>
+          <h3 className="text-foreground font-medium text-sm">{profile?.name || t("sidebar.profile.loading")}</h3>
           <p className="text-muted-foreground text-xs">{profile?.role || "..."}</p>
         </div>
       </div>
@@ -98,14 +101,14 @@ const Sidebar = ({ activeSection, onNavigate }: SidebarProps) => {
                 }`}
             >
               <Icon size={18} className="shrink-0" />
-              <span>{item.label}</span>
+              <span>{t(item.label as any)}</span>
             </button>
           );
         })}
 
         {/* Media Section */}
         <div className="mt-6">
-          <p className="px-4 text-xs text-muted-foreground mb-2">Media</p>
+          <p className="px-4 text-xs text-muted-foreground mb-2">{t("sidebar.media")}</p>
           {socialLinks.map((link) => {
             const Icon = link.icon;
             return (
@@ -124,9 +127,12 @@ const Sidebar = ({ activeSection, onNavigate }: SidebarProps) => {
 
       {/* Theme Toggle */}
       <div className="mt-auto px-4 pt-4">
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <span className="text-xs text-muted-foreground">Toggle theme</span>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <span className="text-xs text-muted-foreground">{t("sidebar.theme.toggle")}</span>
+          </div>
+          <LanguageSwitcher />
         </div>
       </div>
     </aside >

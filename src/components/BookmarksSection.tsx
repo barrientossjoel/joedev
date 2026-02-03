@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { List, ChevronLeft, ExternalLink } from "lucide-react";
-import { useBookmarks, useCategories } from "@/hooks/use-db-data";
+import { useBookmarks, useCategories, useCategoryCoverImages } from "@/hooks/use-db-data";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ const BookmarksSection = () => {
   const { data: categories } = useCategories();
   const [activeCategory, setActiveCategory] = useState("Apps & Tools");
   const [mobileView, setMobileView] = useState<"list" | "detail" | { type: "detail-modal", item: any }>("list");
+  const { data: categoryImages } = useCategoryCoverImages();
 
   // Find active category ID to filter bookmarks
   const activeCategoryId = categories.find(c => c.name === activeCategory)?.id;
@@ -86,7 +87,7 @@ const BookmarksSection = () => {
 
           {/* Mobile: Category Grid View */}
           <div className={`lg:hidden ${mobileView === 'detail' ? 'hidden' : 'block'}`}>
-            <h2 className="text-2xl font-semibold text-foreground mb-6">Collections</h2>
+            <h2 className="text-2xl font-semibold text-foreground mb-6 pl-16 -mt-2 md:pl-0 md:mt-0">Collections</h2>
             <div className="grid grid-cols-2 gap-4">
               {categories.filter(c => !c.parentId).map((category) => {
                 const children = categories.filter(c => c.parentId === category.id);
@@ -97,15 +98,29 @@ const BookmarksSection = () => {
                         setActiveCategory(category.name);
                         setMobileView('detail');
                       }}
-                      className="p-6 rounded-xl border border-border bg-card hover:bg-muted/50 transition-all text-left flex flex-col gap-2 group"
+                      className="p-6 rounded-xl border border-border bg-card hover:bg-muted/50 transition-all text-left flex flex-col gap-2 group relative overflow-hidden"
                     >
-                      <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">
-                        {category.name}
-                      </h3>
-                      <span className="text-sm text-muted-foreground">{category.count} bookmarks</span>
+                      {/* Background Image on Hover */}
+                      {categoryImages[category.id] && (
+                        <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="absolute inset-0 bg-black/60 z-10" />
+                          <img
+                            src={categoryImages[category.id]}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+
+                      <div className="relative z-10">
+                        <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">
+                          {category.name}
+                        </h3>
+                        <span className="text-sm text-muted-foreground">{category.count} bookmarks</span>
+                      </div>
                     </button>
 
-                    {/* Render Children directly in grid for now, maybe distinguish style */}
+                    {/* Children */}
                     {children.map(child => (
                       <button
                         key={child.id}
@@ -113,15 +128,29 @@ const BookmarksSection = () => {
                           setActiveCategory(child.name);
                           setMobileView('detail');
                         }}
-                        className="p-6 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-all text-left flex flex-col gap-2 group relative"
+                        className="p-6 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-all text-left flex flex-col gap-2 group relative overflow-hidden"
                       >
-                        <div className="absolute top-3 right-3 text-xs text-muted-foreground px-2 py-1 bg-background rounded-full border">
+                        {/* Background Image on Hover for children too if available */}
+                        {categoryImages[child.id] && (
+                          <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute inset-0 bg-black/60 z-10" />
+                            <img
+                              src={categoryImages[child.id]}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+
+                        <div className="absolute top-3 right-3 text-xs text-muted-foreground px-2 py-1 bg-background rounded-full border z-20">
                           in {category.name}
                         </div>
-                        <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">
-                          {child.name}
-                        </h3>
-                        <span className="text-sm text-muted-foreground">{child.count} bookmarks</span>
+                        <div className="relative z-10">
+                          <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">
+                            {child.name}
+                          </h3>
+                          <span className="text-sm text-muted-foreground">{child.count} bookmarks</span>
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -133,7 +162,7 @@ const BookmarksSection = () => {
           {/* Mobile & Desktop: Bookmarks Detail View */}
           <div className={`${mobileView === 'list' ? 'hidden lg:block' : 'block'}`}>
             {/* Mobile Header with Back Button */}
-            <div className="flex items-center gap-4 mb-8 lg:hidden">
+            <div className="flex items-center gap-4 mb-8 lg:hidden pl-16 -mt-2 md:pl-0 md:mt-0">
               <button
                 onClick={() => setMobileView('list')}
                 className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors"

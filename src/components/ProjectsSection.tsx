@@ -1,9 +1,11 @@
 import { useProjects } from "@/hooks/use-db-data";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ArrowUpRight, Eye } from "lucide-react";
 
 export function ProjectsSection() {
+  const { t } = useTranslation();
   const { data: projects, loading } = useProjects();
 
   if (loading) return <div>Loading...</div>;
@@ -11,7 +13,7 @@ export function ProjectsSection() {
   return (
     <section id="projects" className="h-screen w-full pt-16 pb-0 bg-background flex flex-col">
       <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-4 text-center px-6 shrink-0">
-        Projects
+        {t("projects.title")}
       </h2>
       <div className="grid grid-cols-2 gap-0 w-full flex-1 min-h-0">
         {projects.map((project) => (
@@ -34,7 +36,7 @@ export function ProjectsSection() {
                 {/* Hover overlay for 'View Details' - darker */}
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                   <span className="text-white font-medium flex items-center gap-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <Eye size={20} /> View Details
+                    <Eye size={20} /> {t("projects.viewDetails")}
                   </span>
                 </div>
 
@@ -46,7 +48,7 @@ export function ProjectsSection() {
                     rel="noopener noreferrer"
                     className="absolute top-4 right-4 z-30 p-2 bg-black/50 hover:bg-white/20 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm pointer-events-auto"
                     onClick={(e) => e.stopPropagation()}
-                    title="Visit Project"
+                    title={t("projects.visitProject") as any} // Cast if needed or string
                   >
                     <ArrowUpRight size={20} />
                   </a>
@@ -81,7 +83,7 @@ export function ProjectsSection() {
                   <div className="pt-4 flex justify-end">
                     <Button asChild>
                       <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                        Visit Project <ArrowUpRight size={16} />
+                        {t("projects.visitProject")} <ArrowUpRight size={16} />
                       </a>
                     </Button>
                   </div>

@@ -1,160 +1,115 @@
-
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { projects, writings, bookmarks, categories } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, isNotNull } from "drizzle-orm";
 
 export function useProjects() {
-    const [data, setData] = useState<typeof projects.$inferSelect[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data, isLoading: loading, error } = useQuery({
+        queryKey: ["projects"],
+        queryFn: async () => {
+            return await db.select().from(projects);
+        },
+    });
 
-    useEffect(() => {
-        async function fetch() {
-            try {
-                const res = await db.select().from(projects);
-                setData(res);
-            } catch (e) {
-                console.error("Failed to fetch projects:", e);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetch();
-    }, []);
-
-    return { data, loading };
+    return { data: data || [], loading, error };
 }
 
 export function useWritings() {
-    const [data, setData] = useState<typeof writings.$inferSelect[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data, isLoading: loading, error } = useQuery({
+        queryKey: ["writings"],
+        queryFn: async () => {
+            return await db.select().from(writings);
+        },
+    });
 
-    useEffect(() => {
-        async function fetch() {
-            try {
-                const res = await db.select().from(writings);
-                setData(res);
-            } catch (e) {
-                console.error("Failed to fetch writings:", e);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetch();
-    }, []);
-
-    return { data, loading };
+    return { data: data || [], loading, error };
 }
 
 export function useBookmarks(categoryId?: number) {
-    const [data, setData] = useState<typeof bookmarks.$inferSelect[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function fetch() {
-            try {
-                setLoading(true);
-                let query = db.select().from(bookmarks);
-                if (categoryId) {
-                    // @ts-ignore - simple filter for now
-                    query = db.select().from(bookmarks).where(eq(bookmarks.categoryId, categoryId));
-                }
-                const res = await query;
-                setData(res);
-            } catch (e) {
-                console.error("Failed to fetch bookmarks:", e);
-            } finally {
-                setLoading(false);
+    const { data, isLoading: loading, error } = useQuery({
+        queryKey: ["bookmarks", categoryId],
+        queryFn: async () => {
+            let query = db.select().from(bookmarks);
+            if (categoryId) {
+                // @ts-ignore - simple filter for now
+                query = db.select().from(bookmarks).where(eq(bookmarks.categoryId, categoryId));
             }
-        }
-        fetch();
-    }, [categoryId]);
+            return await query;
+        },
+    });
 
-    return { data, loading };
+    return { data: data || [], loading, error };
 }
 
 export function useCategories() {
-    const [data, setData] = useState<typeof categories.$inferSelect[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data, isLoading: loading, error } = useQuery({
+        queryKey: ["categories"],
+        queryFn: async () => {
+            return await db.select().from(categories).orderBy(categories.name);
+        },
+    });
 
-    useEffect(() => {
-        async function fetch() {
-            try {
-                const res = await db.select().from(categories).orderBy(categories.name);
-                setData(res);
-            } catch (e) {
-                console.error("Failed to fetch categories:", e);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetch();
-    }, []);
-
-    return { data, loading };
+    return { data: data || [], loading, error };
 }
 
 export function useJourney() {
-    const [data, setData] = useState<typeof schema.journey.$inferSelect[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data, isLoading: loading, error } = useQuery({
+        queryKey: ["journey"],
+        queryFn: async () => {
+            return await db.select().from(schema.journey).orderBy(schema.journey.order);
+        },
+    });
 
-    useEffect(() => {
-        async function fetch() {
-            try {
-                const res = await db.select().from(schema.journey).orderBy(schema.journey.order);
-                setData(res);
-            } catch (e) {
-                console.error("Failed to fetch journey:", e);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetch();
-    }, []);
-
-
-    return { data, loading };
+    return { data: data || [], loading, error };
 }
 
 export function useProfile() {
-    const [data, setData] = useState<typeof schema.profile.$inferSelect | undefined>(undefined);
-    const [loading, setLoading] = useState(true);
+    const { data, isLoading: loading, error } = useQuery({
+        queryKey: ["profile"],
+        queryFn: async () => {
+            const res = await db.select().from(schema.profile).limit(1);
+            return res[0];
+        },
+    });
 
-    useEffect(() => {
-        async function fetch() {
-            try {
-                const res = await db.select().from(schema.profile).limit(1);
-                setData(res[0]);
-            } catch (e) {
-                console.error("Failed to fetch profile:", e);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetch();
-    }, []);
-
-    return { data, loading };
+    return { data, loading, error };
 }
 
 export function useQuotes() {
-    const [data, setData] = useState<typeof schema.quotes.$inferSelect[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data, isLoading: loading, error } = useQuery({
+        queryKey: ["quotes"],
+        queryFn: async () => {
+            return await db.select().from(schema.quotes);
+        },
+    });
 
-    useEffect(() => {
-        async function fetch() {
-            try {
-                const res = await db.select().from(schema.quotes);
-                setData(res);
-            } catch (e) {
-                console.error("Failed to fetch quotes:", e);
-            } finally {
-                setLoading(false);
-            }
+    return { data: data || [], loading, error };
+}
+
+export function useCategoryCoverImages() {
+    const { data, isLoading: loading, error } = useQuery({
+        queryKey: ["categoryCoverImages"],
+        queryFn: async () => {
+            // Fetch all bookmarks that have images
+            return await db.select({
+                categoryId: bookmarks.categoryId,
+                image: bookmarks.image
+            })
+                .from(bookmarks)
+                .where(isNotNull(bookmarks.image));
+        },
+        select: (res) => {
+            // Process to preserve the first image found for each category
+            const map: Record<number, string> = {};
+            res.forEach(item => {
+                if (item.categoryId && !map[item.categoryId] && item.image) {
+                    map[item.categoryId] = item.image;
+                }
+            });
+            return map;
         }
-        fetch();
-    }, []);
+    });
 
-    return { data, loading };
+    return { data: data || {}, loading, error };
 }

@@ -1,11 +1,12 @@
 import { Home, PenLine, Compass, Sun, Bookmark } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const navItems = [
-  { id: "home", icon: Home, label: "Home" },
-  { id: "writing", icon: PenLine, label: "Writing" },
-  { id: "journey", icon: Compass, label: "Journey" },
-  { id: "projects", icon: Sun, label: "Projects" },
-  { id: "bookmarks", icon: Bookmark, label: "Bookmarks" },
+  { id: "home", icon: Home, label: "sidebar.nav.home" },
+  { id: "writing", icon: PenLine, label: "sidebar.nav.writing" },
+  { id: "journey", icon: Compass, label: "sidebar.nav.journey" },
+  { id: "projects", icon: Sun, label: "sidebar.nav.projects" },
+  { id: "bookmarks", icon: Bookmark, label: "sidebar.nav.bookmarks" },
 ];
 
 interface MobileNavProps {
@@ -21,6 +22,7 @@ import { useProfile } from "@/hooks/use-db-data";
 
 const MobileNav = ({ activeSection, onNavigate }: MobileNavProps) => {
   const { data: profile } = useProfile();
+  const { t } = useTranslation();
   return (
     <>
       {/* Floating Theme Toggle for Mobile */}
@@ -34,7 +36,7 @@ const MobileNav = ({ activeSection, onNavigate }: MobileNavProps) => {
           {profile?.image ? (
             <img src={profile.image} alt="Profile" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-secondary flex items-center justify-center text-[10px] text-muted-foreground">IMG</div>
+            <div className="w-full h-full bg-secondary flex items-center justify-center text-[10px] text-muted-foreground">{t("common.img")}</div>
           )}
         </div>
       </div>
@@ -55,7 +57,7 @@ const MobileNav = ({ activeSection, onNavigate }: MobileNavProps) => {
                   }`}
               >
                 <Icon size={20} />
-                <span className="text-xs">{item.label}</span>
+                <span className="text-xs">{t(item.label as any)}</span>
               </button>
             );
           })}
