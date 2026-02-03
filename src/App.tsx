@@ -4,7 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/theme-provider";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
+import { Analytics } from "@vercel/analytics/react";
 import Index from "./pages/Index";
+import Article from "./pages/Article";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
@@ -21,60 +24,60 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-
-            {/* Admin Routes */}
-            <Route path="/admin/login" element={<Login />} />
-            <Route element={<RequireAuth />}>
-              <Route path="/admin" element={
-                <AdminLayout>
-                  <Dashboard />
-                </AdminLayout>
-              } />
-              <Route path="/admin/journey" element={
-                <AdminLayout>
-                  <JourneyAdmin />
-                </AdminLayout>
-              } />
-              <Route path="/admin/projects" element={
-                <AdminLayout>
-                  <ProjectsAdmin />
-                </AdminLayout>
-              } />
-              <Route path="/admin/writings" element={
-                <AdminLayout>
-                  <WritingsAdmin />
-                </AdminLayout>
-              } />
-              <Route path="/admin/bookmarks" element={
-                <AdminLayout>
-                  <BookmarksAdmin />
-                </AdminLayout>
-              } />
-              <Route path="/admin/profile" element={
-                <AdminLayout>
-                  <ProfileAdmin />
-                </AdminLayout>
-              } />
-              <Route path="/admin/quotes" element={
-                <AdminLayout>
-                  <QuotesAdmin />
-                </AdminLayout>
-              } />
-              {/* Add other protected admin routes here */}
-            </Route>
-
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/writing/:slug" element={<Article />} />
+              <Route path="/admin/login" element={<Login />} />
+              <Route element={<RequireAuth />}>
+                <Route path="/admin" element={
+                  <AdminLayout>
+                    <Dashboard />
+                  </AdminLayout>
+                } />
+                <Route path="/admin/journey" element={
+                  <AdminLayout>
+                    <JourneyAdmin />
+                  </AdminLayout>
+                } />
+                <Route path="/admin/projects" element={
+                  <AdminLayout>
+                    <ProjectsAdmin />
+                  </AdminLayout>
+                } />
+                <Route path="/admin/writings" element={
+                  <AdminLayout>
+                    <WritingsAdmin />
+                  </AdminLayout>
+                } />
+                <Route path="/admin/bookmarks" element={
+                  <AdminLayout>
+                    <BookmarksAdmin />
+                  </AdminLayout>
+                } />
+                <Route path="/admin/profile" element={
+                  <AdminLayout>
+                    <ProfileAdmin />
+                  </AdminLayout>
+                } />
+                <Route path="/admin/quotes" element={
+                  <AdminLayout>
+                    <QuotesAdmin />
+                  </AdminLayout>
+                } />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Analytics />
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   </QueryClientProvider>
 );
 

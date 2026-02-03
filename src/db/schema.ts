@@ -15,6 +15,8 @@ export const writings = sqliteTable("writings", {
     year: text("year").notNull(),
     date: text("date").notNull(),
     title: text("title").notNull(),
+    slug: text("slug").notNull().unique(),
+    content: text("content").notNull(),
     views: text("views").notNull(),
     link: text("link"),
 });

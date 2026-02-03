@@ -1,4 +1,4 @@
-import { Home, PenLine, Compass, Sun, Bookmark, Github, Linkedin, type LucideIcon } from "lucide-react";
+import { Home, PenLine, Compass, Sun, Bookmark, Github, Linkedin, Mail, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
@@ -46,7 +46,7 @@ const socialLinks: SocialLink[] = [
   { icon: PinterestIcon, label: "Pinterest", href: "https://ar.pinterest.com/SrShowi/" },
   // { icon: TumblrIcon, label: "Tumblr", href: "#" }, // Keeping specific requested order/items
   { icon: GoodreadsIcon, label: "Goodreads", href: "https://www.goodreads.com/user/show/90977974-joel-barrientos" },
-  // { icon: MediumIcon, label: "Medium", href: "#" }, 
+  { icon: Mail, label: "Gmail", href: "https://mail.google.com/mail/?view=cm&fs=1&to=barrientoss.joel@gmail.com" },
 ];
 
 interface SidebarProps {

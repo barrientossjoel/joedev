@@ -81,11 +81,11 @@ async function seed() {
     // Seed Writings
     console.log("Creating writings...");
     const writingData = [
-        { year: "2024", date: "27/08", title: "Developing the definitive portfolio", views: "Views" },
-        { year: "2024", date: "20/07", title: "Understanding React 19 Actions", views: "1.2k" },
-        { year: "2023", date: "15/11", title: "Why I switched to Bun", views: "800" },
-        { year: "2023", date: "01/10", title: "Minimalism in Code", views: "2.5k" },
-        { year: "2023", date: "12/09", title: "The Future of Web Development", views: "3k" },
+        { year: "2024", date: "27/08", title: "Developing the definitive portfolio", slug: "developing-the-definitive-portfolio", content: "# Developing the definitive portfolio\n\nThis is a sample article content.", views: "Views" },
+        { year: "2024", date: "20/07", title: "Understanding React 19 Actions", slug: "understanding-react-19-actions", content: "# Understanding React 19 Actions\n\nReact 19 brings exciting new features.", views: "1.2k" },
+        { year: "2023", date: "15/11", title: "Why I switched to Bun", slug: "why-i-switched-to-bun", content: "# Why I switched to Bun\n\nBun is fast, really fast.", views: "800" },
+        { year: "2023", date: "01/10", title: "Minimalism in Code", slug: "minimalism-in-code", content: "# Minimalism in Code\n\nLess is more.", views: "2.5k" },
+        { year: "2023", date: "12/09", title: "The Future of Web Development", slug: "the-future-of-web-development", content: "# The Future of Web Development\n\nAI is changing everything.", views: "3k" },
     ];
 
     await db.delete(writings);

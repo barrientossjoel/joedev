@@ -36,6 +36,13 @@
       "when": 1769979128340,
       "tag": "0004_round_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1770079691895,
+      "tag": "0005_quiet_speed",
+      "breakpoints": true
     }
   ]
 }

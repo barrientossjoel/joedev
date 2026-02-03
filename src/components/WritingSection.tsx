@@ -1,5 +1,8 @@
 import { useWritings } from "@/hooks/use-db-data";
 
+// Placeholder to satisfy tool call requirement while I look at WritingSection
+import { Link } from "react-router-dom";
+
 const WritingSection = () => {
   const { data: writings, loading } = useWritings();
 
@@ -20,19 +23,53 @@ const WritingSection = () => {
       </div>
 
       {/* Table Rows */}
-      {writings.map((item, index) => (
-        <div
-          key={index}
-          className="grid grid-cols-12 gap-4 py-4 border-b border-border transition-colors cursor-pointer group"
-        >
-          <div className="col-span-2 text-muted-foreground text-sm group-hover:text-primary transition-colors">{item.year}</div>
-          <div className="col-span-2 text-muted-foreground text-sm group-hover:text-primary transition-colors">{item.date}</div>
-          <div className="col-span-6 text-sm text-muted-foreground group-hover:text-primary transition-colors">
-            {item.title}
-          </div>
-          <div className="col-span-2 text-muted-foreground text-sm text-right group-hover:text-primary transition-colors">{item.views}</div>
-        </div>
-      ))}
+      {writings.map((item, index) => {
+        const isInternal = !!item.slug;
+        const href = isInternal ? `/writing/${item.slug}` : item.link;
+
+        // Wrapper for the row content to make it clickable
+        const RowContent = () => (
+          <>
+            <div className="col-span-2 text-muted-foreground text-sm group-hover:text-primary transition-colors">{item.year}</div>
+            <div className="col-span-2 text-muted-foreground text-sm group-hover:text-primary transition-colors">{item.date}</div>
+            <div className="col-span-6 text-sm text-muted-foreground group-hover:text-primary transition-colors font-medium">
+              {item.title}
+            </div>
+            <div className="col-span-2 text-muted-foreground text-sm text-right group-hover:text-primary transition-colors">{item.views}</div>
+          </>
+        );
+
+        return (
+          href ? (
+            isInternal ? (
+              <Link
+                key={index}
+                to={href}
+                className="grid grid-cols-12 gap-4 py-4 border-b border-border transition-colors cursor-pointer group hover:bg-muted/50 px-2 -mx-2 rounded-md"
+              >
+                <RowContent />
+              </Link>
+            ) : (
+              <a
+                key={index}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="grid grid-cols-12 gap-4 py-4 border-b border-border transition-colors cursor-pointer group hover:bg-muted/50 px-2 -mx-2 rounded-md"
+              >
+                <RowContent />
+              </a>
+            )
+          ) : (
+            <div
+              key={index}
+              className="grid grid-cols-12 gap-4 py-4 border-b border-border transition-colors group px-2 -mx-2"
+            >
+              <RowContent />
+            </div>
+          )
+        );
+      })}
     </section>
   );
 };

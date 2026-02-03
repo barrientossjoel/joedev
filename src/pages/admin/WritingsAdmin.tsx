@@ -1,9 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWritings } from "@/hooks/use-db-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Dialog,
     DialogContent,
@@ -36,21 +37,41 @@ const WritingsAdmin = () => {
     const [year, setYear] = useState("");
     const [date, setDate] = useState("");
     const [title, setTitle] = useState("");
+    const [slug, setSlug] = useState("");
+    const [content, setContent] = useState("");
     const [views, setViews] = useState("");
     const [link, setLink] = useState("");
 
+    // Helper to track if user manually edited slug
+    const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
+
+    // Auto-generate slug from title
+    useEffect(() => {
+        if (!editingItem && !isSlugManuallyEdited && title) {
+            const autoSlug = title
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
+            setSlug(autoSlug);
+        }
+    }, [title, editingItem, isSlugManuallyEdited]);
+
     const resetForm = () => {
-        setYear("");
-        setDate("");
+        setYear(new Date().getFullYear().toString());
+        setDate(new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })); // e.g. 2/3
         setTitle("");
-        setViews("");
+        setSlug("");
+        setContent("");
+        setViews("0");
         setLink("");
         setEditingItem(null);
+        setIsSlugManuallyEdited(false);
     };
 
     const handleOpenChange = (open: boolean) => {
         setIsOpen(open);
         if (!open) resetForm();
+        else if (!editingItem) resetForm(); // Reset when opening new
     };
 
     const handleEdit = (item: typeof schema.writings.$inferSelect) => {
@@ -58,9 +79,12 @@ const WritingsAdmin = () => {
         setYear(item.year);
         setDate(item.date);
         setTitle(item.title);
+        setSlug(item.slug || "");
+        setContent(item.content || "");
         setViews(item.views);
         setLink(item.link || "");
         setIsOpen(true);
+        setIsSlugManuallyEdited(true); // Don't auto-update slug when editing
     };
 
     const handleDelete = async (id: number) => {
@@ -81,7 +105,7 @@ const WritingsAdmin = () => {
         setIsLoading(true);
 
         try {
-            const values = { year, date, title, views, link };
+            const values = { year, date, title, slug, content, views, link };
 
             if (editingItem) {
                 await db.update(schema.writings)
@@ -119,7 +143,7 @@ const WritingsAdmin = () => {
                             Add Article
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-2xl">
                         <DialogHeader>
                             <DialogTitle>{editingItem ? "Edit Article" : "Add Article"}</DialogTitle>
                         </DialogHeader>
@@ -134,18 +158,47 @@ const WritingsAdmin = () => {
                                     <Input value={date} onChange={e => setDate(e.target.value)} required placeholder="12/05" />
                                 </div>
                             </div>
+
                             <div className="space-y-2">
                                 <Label>Title</Label>
                                 <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Article Title" />
                             </div>
+
+                            <div className="space-y-2">
+                                <Label>Slug (URL)</Label>
+                                <Input
+                                    value={slug}
+                                    onChange={e => {
+                                        setSlug(e.target.value);
+                                        setIsSlugManuallyEdited(true);
+                                    }}
+                                    required
+                                    placeholder="article-title-slug"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    URL: /writing/{slug}
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Content (Markdown)</Label>
+                                <Textarea
+                                    value={content}
+                                    onChange={e => setContent(e.target.value)}
+                                    required
+                                    placeholder="# My Article content..."
+                                    className="min-h-[200px]"
+                                />
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label>Views</Label>
-                                    <Input value={views} onChange={e => setViews(e.target.value)} required placeholder="1.2k" />
+                                    <Input value={views} onChange={e => setViews(e.target.value)} required placeholder="0" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Link (Optional)</Label>
-                                    <Input value={link} onChange={e => setLink(e.target.value)} placeholder="https://..." />
+                                    <Label>External Link (Optional)</Label>
+                                    <Input value={link} onChange={e => setLink(e.target.value)} placeholder="https://... (overrides internal)" />
                                 </div>
                             </div>
                             <DialogFooter>
@@ -163,9 +216,9 @@ const WritingsAdmin = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-24">Year</TableHead>
                             <TableHead className="w-24">Date</TableHead>
                             <TableHead>Title</TableHead>
+                            <TableHead>Slug</TableHead>
                             <TableHead>Views</TableHead>
                             <TableHead className="w-24 text-right">Actions</TableHead>
                         </TableRow>
@@ -173,13 +226,17 @@ const WritingsAdmin = () => {
                     <TableBody>
                         {writings.map((item) => (
                             <TableRow key={item.id}>
-                                <TableCell className="text-muted-foreground">{item.year}</TableCell>
-                                <TableCell className="font-mono text-xs">{item.date}</TableCell>
+                                <TableCell className="font-mono text-xs text-muted-foreground">
+                                    {item.date}/{item.year}
+                                </TableCell>
                                 <TableCell className="font-medium">
                                     <div className="flex items-center gap-2">
                                         {item.title}
                                         {item.link && <LinkIcon size={12} className="text-muted-foreground" />}
                                     </div>
+                                </TableCell>
+                                <TableCell className="text-muted-foreground text-sm font-mono">
+                                    {item.slug}
                                 </TableCell>
                                 <TableCell className="text-muted-foreground text-sm">
                                     <div className="flex items-center gap-1">
