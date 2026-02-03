@@ -35,7 +35,7 @@ import * as schema from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 // Sub-component for managing categories
-const CategoryManager = ({ categories }: { categories: typeof schema.categories.$inferSelect[] }) => {
+const CategoryManager = ({ categories, counts }: { categories: typeof schema.categories.$inferSelect[], counts: Record<number, number> }) => {
     const [name, setName] = useState("");
     const [parentId, setParentId] = useState<string>("root"); // "root" or ID
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -149,7 +149,7 @@ const CategoryManager = ({ categories }: { categories: typeof schema.categories.
                             {categories.map(cat => (
                                 <TableRow key={cat.id}>
                                     <TableCell className="py-2 font-medium">
-                                        {cat.name} <span className="text-muted-foreground font-normal text-xs ml-1">({cat.count} items)</span>
+                                        {cat.name} <span className="text-muted-foreground font-normal text-xs ml-1">({counts[cat.id] || 0} items)</span>
                                     </TableCell>
                                     <TableCell className="py-2 text-muted-foreground text-xs">{getParentName(cat.parentId)}</TableCell>
                                     <TableCell className="py-2 text-right">
@@ -340,6 +340,14 @@ const BookmarksAdmin = () => {
         ? bookmarks.filter(b => b.categoryId === selectedCategoryId)
         : bookmarks;
 
+    // Calculate real counts from bookmarks
+    const categoryCounts = bookmarks.reduce((acc, b) => {
+        if (b.categoryId) {
+            acc[b.categoryId] = (acc[b.categoryId] || 0) + 1;
+        }
+        return acc;
+    }, {} as Record<number, number>);
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -364,7 +372,7 @@ const BookmarksAdmin = () => {
                                 <DialogHeader>
                                     <DialogTitle>Manage Categories</DialogTitle>
                                 </DialogHeader>
-                                <CategoryManager categories={categories} />
+                                <CategoryManager categories={categories} counts={categoryCounts} />
                             </DialogContent>
                         </Dialog>
                     </div>
