@@ -1,4 +1,6 @@
 import { useJourney } from "@/hooks/use-db-data";
+import i18n from "@/i18n";
+import { useTranslation } from "react-i18next";
 
 interface JourneyEvent {
   year: string;
@@ -9,6 +11,7 @@ interface JourneyEvent {
 }
 
 const JourneySection = () => {
+  const { t } = useTranslation();
   const { data: journeyEvents, loading } = useJourney();
 
   if (loading) {
@@ -17,13 +20,6 @@ const JourneySection = () => {
 
   // Group events by year
   const groupedData: JourneyEvent[] = [];
-
-  // Sort by year descending (implied by order in seed, but explicit sort is safer)
-  // Assuming seed order 1 is top? The seed used years mixed. 
-  // Let's sort the raw events by year (descending) and then order (ascending/descending?)
-  // Actually, the seed has an 'order' field. Let's rely on the DB sort if possible, 
-  // but DB sort was only by 'order' in the hook.
-  // Let's group locally.
 
   // Helper to find existing group
   const getGroup = (year: string) => groupedData.find(g => g.year === year);
@@ -34,7 +30,9 @@ const JourneySection = () => {
       group = { year: event.year, events: [] };
       groupedData.push(group);
     }
-    group.events.push({ title: event.title, description: event.description });
+    const title = i18n.language === 'es' ? (event.title_es || event.title) : event.title;
+    const description = i18n.language === 'es' ? (event.description_es || event.description) : event.description;
+    group.events.push({ title, description });
   });
 
   // Sort groups by year descending
@@ -44,7 +42,7 @@ const JourneySection = () => {
   return (
     <section id="journey" className="min-h-screen flex flex-col justify-center py-20 px-6 md:px-12 lg:px-20 max-w-5xl mx-auto w-full">
       <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-12">
-        Journey
+        {t("journey.title")}
       </h2>
 
       <div className="space-y-0">

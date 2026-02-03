@@ -37,8 +37,10 @@ const WritingsAdmin = () => {
     const [year, setYear] = useState("");
     const [date, setDate] = useState("");
     const [title, setTitle] = useState("");
+    const [titleEs, setTitleEs] = useState("");
     const [slug, setSlug] = useState("");
     const [content, setContent] = useState("");
+    const [contentEs, setContentEs] = useState("");
     const [views, setViews] = useState("");
     const [link, setLink] = useState("");
 
@@ -60,8 +62,10 @@ const WritingsAdmin = () => {
         setYear(new Date().getFullYear().toString());
         setDate(new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })); // e.g. 2/3
         setTitle("");
+        setTitleEs("");
         setSlug("");
         setContent("");
+        setContentEs("");
         setViews("0");
         setLink("");
         setEditingItem(null);
@@ -79,8 +83,10 @@ const WritingsAdmin = () => {
         setYear(item.year);
         setDate(item.date);
         setTitle(item.title);
+        setTitleEs(item.title_es || "");
         setSlug(item.slug || "");
         setContent(item.content || "");
+        setContentEs(item.content_es || "");
         setViews(item.views);
         setLink(item.link || "");
         setIsOpen(true);
@@ -105,7 +111,17 @@ const WritingsAdmin = () => {
         setIsLoading(true);
 
         try {
-            const values = { year, date, title, slug, content, views, link };
+            const values = {
+                year,
+                date,
+                title,
+                title_es: titleEs,
+                slug,
+                content,
+                content_es: contentEs,
+                views,
+                link
+            };
 
             if (editingItem) {
                 await db.update(schema.writings)
@@ -143,7 +159,7 @@ const WritingsAdmin = () => {
                             Add Article
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>{editingItem ? "Edit Article" : "Add Article"}</DialogTitle>
                         </DialogHeader>
@@ -159,9 +175,15 @@ const WritingsAdmin = () => {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Title</Label>
-                                <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Article Title" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Title (EN)</Label>
+                                    <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Article Title" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Title (ES)</Label>
+                                    <Input value={titleEs} onChange={e => setTitleEs(e.target.value)} placeholder="Título del Artículo" />
+                                </div>
                             </div>
 
                             <div className="space-y-2">
@@ -180,15 +202,26 @@ const WritingsAdmin = () => {
                                 </p>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Content (Markdown)</Label>
-                                <Textarea
-                                    value={content}
-                                    onChange={e => setContent(e.target.value)}
-                                    required
-                                    placeholder="# My Article content..."
-                                    className="min-h-[200px]"
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Content (EN - Markdown)</Label>
+                                    <Textarea
+                                        value={content}
+                                        onChange={e => setContent(e.target.value)}
+                                        required
+                                        placeholder="# My Article content..."
+                                        className="min-h-[200px]"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Content (ES - Markdown)</Label>
+                                    <Textarea
+                                        value={contentEs}
+                                        onChange={e => setContentEs(e.target.value)}
+                                        placeholder="# Contenido del artículo..."
+                                        className="min-h-[200px]"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">

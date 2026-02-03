@@ -14,7 +14,9 @@ const ProfileAdmin = () => {
     const { data: profile, loading } = useProfile();
     const [name, setName] = useState("");
     const [role, setRole] = useState("");
+    const [roleEs, setRoleEs] = useState("");
     const [bio, setBio] = useState("");
+    const [bioEs, setBioEs] = useState("");
     const [image, setImage] = useState(""); // Base64 or URL
     const [saving, setSaving] = useState(false);
 
@@ -22,7 +24,9 @@ const ProfileAdmin = () => {
         if (profile) {
             setName(profile.name);
             setRole(profile.role);
+            setRoleEs(profile.role_es || "");
             setBio(profile.bio || "");
+            setBioEs(profile.bio_es || "");
             setImage(profile.image);
         }
     }, [profile]);
@@ -45,12 +49,12 @@ const ProfileAdmin = () => {
             if (profile) {
                 // Update
                 await db.update(schema.profile)
-                    .set({ name, role, bio, image })
+                    .set({ name, role, role_es: roleEs, bio, bio_es: bioEs, image })
                     .where(eq(schema.profile.id, profile.id));
                 toast.success("Profile updated successfully");
             } else {
                 // Create
-                await db.insert(schema.profile).values({ name, role, bio, image });
+                await db.insert(schema.profile).values({ name, role, role_es: roleEs, bio, bio_es: bioEs, image });
                 toast.success("Profile created successfully");
                 // Reload to refresh the hook state ideally, or we just rely on local state
                 window.location.reload();
@@ -109,24 +113,46 @@ const ProfileAdmin = () => {
                     />
                 </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="role">Role / Job Title</Label>
-                    <Input
-                        id="role"
-                        value={role}
-                        onChange={e => setRole(e.target.value)}
-                        placeholder="e.g. Frontend Developer"
-                        required
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="role">Role (English)</Label>
+                        <Input
+                            id="role"
+                            value={role}
+                            onChange={e => setRole(e.target.value)}
+                            placeholder="e.g. Frontend Developer"
+                            required
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="roleEs">Role (Spanish)</Label>
+                        <Input
+                            id="roleEs"
+                            value={roleEs}
+                            onChange={e => setRoleEs(e.target.value)}
+                            placeholder="e.g. Desarrollador Frontend"
+                        />
+                    </div>
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="bio">Bio / Home Description</Label>
+                    <Label htmlFor="bio">Bio (English)</Label>
                     <textarea
                         id="bio"
                         value={bio}
                         onChange={e => setBio(e.target.value)}
                         placeholder="Describe yourself for the home page..."
+                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="bioEs">Bio (Spanish)</Label>
+                    <textarea
+                        id="bioEs"
+                        value={bioEs}
+                        onChange={e => setBioEs(e.target.value)}
+                        placeholder="Descríbete para la página de inicio..."
                         className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                 </div>

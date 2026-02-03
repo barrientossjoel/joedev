@@ -35,11 +35,13 @@ const QuotesAdmin = () => {
 
     // Form state
     const [text, setText] = useState("");
+    const [textEs, setTextEs] = useState("");
     const [author, setAuthor] = useState("");
     const [background, setBackground] = useState("");
 
     const resetForm = () => {
         setText("");
+        setTextEs("");
         setAuthor("");
         setBackground("");
         setEditingItem(null);
@@ -53,6 +55,7 @@ const QuotesAdmin = () => {
     const handleEdit = (item: typeof schema.quotes.$inferSelect) => {
         setEditingItem(item);
         setText(item.text);
+        setTextEs(item.text_es || "");
         setAuthor(item.author);
         setBackground(item.background || "");
         setIsOpen(true);
@@ -73,7 +76,12 @@ const QuotesAdmin = () => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const values = { text, author, background };
+            const values = {
+                text,
+                text_es: textEs,
+                author,
+                background
+            };
 
             if (editingItem) {
                 await db.update(schema.quotes)
@@ -115,12 +123,20 @@ const QuotesAdmin = () => {
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label>Quote Text</Label>
+                                <Label>Quote Text (EN)</Label>
                                 <Textarea
                                     value={text}
                                     onChange={e => setText(e.target.value)}
                                     required
                                     placeholder="The only way to do great work..."
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Quote Text (ES)</Label>
+                                <Textarea
+                                    value={textEs}
+                                    onChange={e => setTextEs(e.target.value)}
+                                    placeholder="La única forma de hacer un gran trabajo..."
                                 />
                             </div>
                             <div className="space-y-2">

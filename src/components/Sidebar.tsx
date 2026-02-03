@@ -1,5 +1,6 @@
 import { Home, PenLine, Compass, Sun, Bookmark, Github, Linkedin, Mail, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 
@@ -81,7 +82,9 @@ const Sidebar = ({ activeSection, onNavigate }: SidebarProps) => {
         </div>
         <div>
           <h3 className="text-foreground font-medium text-sm">{profile?.name || t("sidebar.profile.loading")}</h3>
-          <p className="text-muted-foreground text-xs">{profile?.role || "..."}</p>
+          <p className="text-muted-foreground text-xs">
+            {profile ? (i18n.language === 'es' ? (profile.role_es || profile.role) : profile.role) : "..."}
+          </p>
         </div>
       </div>
 

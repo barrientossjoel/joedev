@@ -1,5 +1,6 @@
 import { useProjects } from "@/hooks/use-db-data";
 import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ArrowUpRight, Eye } from "lucide-react";
@@ -16,82 +17,86 @@ export function ProjectsSection() {
         {t("projects.title")}
       </h2>
       <div className="grid grid-cols-2 gap-0 w-full flex-1 min-h-0">
-        {projects.map((project) => (
-          <Dialog key={project.id}>
-            <div className="group relative overflow-hidden cursor-pointer border border-border bg-card h-full w-full">
-              <DialogTrigger asChild>
-                <div className="absolute inset-0 z-10" />
-              </DialogTrigger>
+        {projects.map((project) => {
+          const title = i18n.language === 'es' ? (project.title_es || project.title) : project.title;
+          const description = i18n.language === 'es' ? (project.description_es || project.description) : project.description;
+          return (
+            <Dialog key={project.id}>
+              <div className="group relative overflow-hidden cursor-pointer border border-border bg-card h-full w-full">
+                <DialogTrigger asChild>
+                  <div className="absolute inset-0 z-10" />
+                </DialogTrigger>
 
-              {/* Image filling the block */}
-              <div className="absolute inset-0">
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                {/* Gradient overlay for text readability - always visible */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-
-                {/* Hover overlay for 'View Details' - darker */}
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                  <span className="text-white font-medium flex items-center gap-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <Eye size={20} /> {t("projects.viewDetails")}
-                  </span>
-                </div>
-
-                {/* Direct Visit Link on Hover */}
-                {project.link && (
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute top-4 right-4 z-30 p-2 bg-black/50 hover:bg-white/20 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm pointer-events-auto"
-                    onClick={(e) => e.stopPropagation()}
-                    title={t("projects.visitProject") as any} // Cast if needed or string
-                  >
-                    <ArrowUpRight size={20} />
-                  </a>
-                )}
-              </div>
-
-              {/* Text Content - Always Visible over image */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 z-20 pointer-events-none">
-                <span className="text-xs font-mono text-gray-300 mb-2 block">{project.number}</span>
-                <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-primary transition-colors">{project.title}</h3>
-                <p className="text-gray-300 line-clamp-2 text-sm max-w-[90%]">{project.description}</p>
-              </div>
-            </div>
-
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-2xl">{project.title}</DialogTitle>
-                <DialogDescription className="text-sm font-mono">{project.number}</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-6">
-                <div className="rounded-lg overflow-hidden border border-border">
+                {/* Image filling the block */}
+                <div className="absolute inset-0">
                   <img
                     src={project.image}
-                    alt={project.title}
-                    className="w-full h-auto"
+                    alt={title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                </div>
-                <div className="prose dark:prose-invert max-w-none text-muted-foreground">
-                  <p className="whitespace-pre-line">{project.description}</p>
-                </div>
-                {project.link && (
-                  <div className="pt-4 flex justify-end">
-                    <Button asChild>
-                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                        {t("projects.visitProject")} <ArrowUpRight size={16} />
-                      </a>
-                    </Button>
+                  {/* Gradient overlay for text readability - always visible */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+
+                  {/* Hover overlay for 'View Details' - darker */}
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                    <span className="text-white font-medium flex items-center gap-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                      <Eye size={20} /> {t("projects.viewDetails")}
+                    </span>
                   </div>
-                )}
+
+                  {/* Direct Visit Link on Hover */}
+                  {project.link && (
+                    <a
+                      href={project.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute top-4 right-4 z-30 p-2 bg-black/50 hover:bg-white/20 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm pointer-events-auto"
+                      onClick={(e) => e.stopPropagation()}
+                      title={t("projects.visitProject") as any} // Cast if needed or string
+                    >
+                      <ArrowUpRight size={20} />
+                    </a>
+                  )}
+                </div>
+
+                {/* Text Content - Always Visible over image */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 z-20 pointer-events-none">
+                  <span className="text-xs font-mono text-gray-300 mb-2 block">{project.number}</span>
+                  <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-primary transition-colors">{title}</h3>
+                  <p className="text-gray-300 line-clamp-2 text-sm max-w-[90%]">{description}</p>
+                </div>
               </div>
-            </DialogContent>
-          </Dialog>
-        ))}
+
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl">{title}</DialogTitle>
+                  <DialogDescription className="text-sm font-mono">{project.number}</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6">
+                  <div className="rounded-lg overflow-hidden border border-border">
+                    <img
+                      src={project.image}
+                      alt={title}
+                      className="w-full h-auto"
+                    />
+                  </div>
+                  <div className="prose dark:prose-invert max-w-none text-muted-foreground">
+                    <p className="whitespace-pre-line">{description}</p>
+                  </div>
+                  {project.link && (
+                    <div className="pt-4 flex justify-end">
+                      <Button asChild>
+                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                          {t("projects.visitProject")} <ArrowUpRight size={16} />
+                        </a>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          );
+        })}
       </div>
 
     </section >

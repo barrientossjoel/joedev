@@ -37,13 +37,17 @@ const JourneyAdmin = () => {
     // Form state
     const [year, setYear] = useState("");
     const [title, setTitle] = useState("");
+    const [titleEs, setTitleEs] = useState("");
     const [description, setDescription] = useState("");
+    const [descriptionEs, setDescriptionEs] = useState("");
     const [order, setOrder] = useState(0);
 
     const resetForm = () => {
         setYear("");
         setTitle("");
+        setTitleEs("");
         setDescription("");
+        setDescriptionEs("");
         setOrder(0);
         setEditingItem(null);
     };
@@ -57,7 +61,9 @@ const JourneyAdmin = () => {
         setEditingItem(item);
         setYear(item.year);
         setTitle(item.title);
+        setTitleEs(item.title_es || "");
         setDescription(item.description);
+        setDescriptionEs(item.description_es || "");
         setOrder(item.order);
         setIsOpen(true);
     };
@@ -81,7 +87,14 @@ const JourneyAdmin = () => {
         setIsLoading(true);
 
         try {
-            const values = { year, title, description, order };
+            const values = {
+                year,
+                title,
+                title_es: titleEs,
+                description,
+                description_es: descriptionEs,
+                order
+            };
 
             if (editingItem) {
                 await db.update(schema.journey)
@@ -119,7 +132,7 @@ const JourneyAdmin = () => {
                             Add Event
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>{editingItem ? "Edit Event" : "Add Event"}</DialogTitle>
                             <DialogDescription>
@@ -138,12 +151,20 @@ const JourneyAdmin = () => {
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label>Title</Label>
+                                <Label>Title (EN)</Label>
                                 <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Role or Achievement" />
                             </div>
                             <div className="space-y-2">
-                                <Label>Description</Label>
+                                <Label>Title (ES)</Label>
+                                <Input value={titleEs} onChange={e => setTitleEs(e.target.value)} placeholder="Rol o Logro" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Description (EN)</Label>
                                 <Textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Details..." />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Description (ES)</Label>
+                                <Textarea value={descriptionEs} onChange={e => setDescriptionEs(e.target.value)} placeholder="Detalles..." />
                             </div>
                             <DialogFooter>
                                 <Button type="submit" disabled={isLoading}>

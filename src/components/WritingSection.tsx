@@ -1,6 +1,5 @@
 import { useWritings } from "@/hooks/use-db-data";
-
-// Placeholder to satisfy tool call requirement while I look at WritingSection
+import i18n from "@/i18n";
 import { Link } from "react-router-dom";
 
 const WritingSection = () => {
@@ -26,6 +25,7 @@ const WritingSection = () => {
       {writings.map((item, index) => {
         const isInternal = !!item.slug;
         const href = isInternal ? `/writing/${item.slug}` : item.link;
+        const title = i18n.language === 'es' ? (item.title_es || item.title) : item.title;
 
         // Wrapper for the row content to make it clickable
         const RowContent = () => (
@@ -33,7 +33,7 @@ const WritingSection = () => {
             <div className="col-span-2 text-muted-foreground text-sm group-hover:text-primary transition-colors">{item.year}</div>
             <div className="col-span-2 text-muted-foreground text-sm group-hover:text-primary transition-colors">{item.date}</div>
             <div className="col-span-6 text-sm text-muted-foreground group-hover:text-primary transition-colors font-medium">
-              {item.title}
+              {title}
             </div>
             <div className="col-span-2 text-muted-foreground text-sm text-right group-hover:text-primary transition-colors">{item.views}</div>
           </>

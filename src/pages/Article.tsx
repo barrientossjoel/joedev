@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useWritings } from "@/hooks/use-db-data";
+import i18n from "@/i18n";
 import { ArrowLeft, Calendar, Share2, Eye } from "lucide-react";
 import Markdown from "react-markdown";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,9 @@ const Article = () => {
         );
     }
 
+    const title = i18n.language === 'es' ? (article.title_es || article.title) : article.title;
+    const content = i18n.language === 'es' ? (article.content_es || article.content) : article.content;
+
     const handleShare = () => {
         navigator.clipboard.writeText(window.location.href);
         toast.success("Link copied to clipboard!");
@@ -39,8 +43,8 @@ const Article = () => {
     return (
         <>
             <SEO
-                title={`${article.title} | Joel Barrientos`}
-                description={`Read ${article.title} by Joel Barrientos.`}
+                title={`${title} | Joel Barrientos`}
+                description={`Read ${title} by Joel Barrientos.`}
                 type="article"
             />
             <div className="min-h-screen bg-background text-foreground">
@@ -72,7 +76,7 @@ const Article = () => {
                         </div>
 
                         <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-tight mb-6">
-                            {article.title}
+                            {title}
                         </h1>
 
                         <Button variant="outline" size="sm" onClick={handleShare} className="gap-2">
@@ -83,7 +87,7 @@ const Article = () => {
 
                     <article className="prose prose-zinc dark:prose-invert max-w-none prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-a:text-primary prose-img:rounded-xl">
                         <Markdown>
-                            {article.content}
+                            {content}
                         </Markdown>
                     </article>
                 </div>

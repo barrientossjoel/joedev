@@ -37,6 +37,13 @@ export const es = {
             title: "Proyectos",
             viewDetails: "Ver Detalles",
             visitProject: "Visitar Proyecto",
+            visit: "Visitar",
+        },
+        bookmarks: {
+            title: "Marcadores",
+        },
+        journey: {
+            title: "Trayectoria",
         },
         common: {
             loading: "Cargando...",

@@ -37,6 +37,7 @@ import { eq } from "drizzle-orm";
 // Sub-component for managing categories
 const CategoryManager = ({ categories, counts }: { categories: typeof schema.categories.$inferSelect[], counts: Record<number, number> }) => {
     const [name, setName] = useState("");
+    const [nameEs, setNameEs] = useState("");
     const [parentId, setParentId] = useState<string>("root"); // "root" or ID
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -53,14 +54,15 @@ const CategoryManager = ({ categories, counts }: { categories: typeof schema.cat
 
             if (editingId) {
                 await db.update(schema.categories)
-                    .set({ name, parentId: newParentId })
+                    .set({ name, name_es: nameEs, parentId: newParentId })
                     .where(eq(schema.categories.id, editingId));
                 toast.success("Category updated");
             } else {
-                await db.insert(schema.categories).values({ name, count: 0, parentId: newParentId });
+                await db.insert(schema.categories).values({ name, name_es: nameEs, count: 0, parentId: newParentId });
                 toast.success("Category created");
             }
             setName("");
+            setNameEs("");
             setParentId("root");
             setEditingId(null);
             window.location.reload();
@@ -97,12 +99,20 @@ const CategoryManager = ({ categories, counts }: { categories: typeof schema.cat
         <div className="space-y-4">
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                 <div className="space-y-1">
-                    <Label className="text-xs">Category Name</Label>
+                    <Label className="text-xs">Category Name (EN)</Label>
                     <Input
                         value={name}
                         onChange={e => setName(e.target.value)}
                         placeholder="Category name..."
                         required
+                    />
+                </div>
+                <div className="space-y-1">
+                    <Label className="text-xs">Category Name (ES)</Label>
+                    <Input
+                        value={nameEs}
+                        onChange={e => setNameEs(e.target.value)}
+                        placeholder="Nombre de categoría..."
                     />
                 </div>
                 <div className="space-y-1">
@@ -123,7 +133,7 @@ const CategoryManager = ({ categories, counts }: { categories: typeof schema.cat
                 </div>
                 <div className="flex gap-2 justify-end">
                     {editingId && (
-                        <Button type="button" variant="ghost" size="sm" onClick={() => { setName(""); setParentId("root"); setEditingId(null); }}>
+                        <Button type="button" variant="ghost" size="sm" onClick={() => { setName(""); setNameEs(""); setParentId("root"); setEditingId(null); }}>
                             Cancel
                         </Button>
                     )}
@@ -156,6 +166,7 @@ const CategoryManager = ({ categories, counts }: { categories: typeof schema.cat
                                         <div className="flex justify-end gap-1">
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => {
                                                 setName(cat.name);
+                                                setNameEs(cat.name_es || "");
                                                 setParentId(cat.parentId ? cat.parentId.toString() : "root");
                                                 setEditingId(cat.id);
                                             }}>
@@ -189,7 +200,9 @@ const BookmarksAdmin = () => {
 
     // Form state
     const [title, setTitle] = useState("");
+    const [titleEs, setTitleEs] = useState("");
     const [description, setDescription] = useState("");
+    const [descriptionEs, setDescriptionEs] = useState("");
     const [link, setLink] = useState("");
     const [mediaUrl, setMediaUrl] = useState("");
     const [categoryId, setCategoryId] = useState<string>("");
@@ -197,7 +210,9 @@ const BookmarksAdmin = () => {
 
     const resetForm = () => {
         setTitle("");
+        setTitleEs("");
         setDescription("");
+        setDescriptionEs("");
         setLink("");
         setMediaUrl("");
         setCategoryId(selectedCategoryId ? selectedCategoryId.toString() : ""); // Pre-select current category
@@ -220,7 +235,9 @@ const BookmarksAdmin = () => {
     const handleEdit = (item: typeof schema.bookmarks.$inferSelect) => {
         setEditingItem(item);
         setTitle(item.title);
+        setTitleEs(item.title_es || "");
         setDescription(item.description || "");
+        setDescriptionEs(item.description_es || "");
         setLink(item.link || "");
         setMediaUrl(item.video || item.image || "");
         setCategoryId(item.categoryId?.toString() || "");
@@ -269,7 +286,9 @@ const BookmarksAdmin = () => {
             const isVid = isVideo(mediaUrl);
             const values = {
                 title,
+                title_es: titleEs,
                 description,
+                description_es: descriptionEs,
                 link,
                 image: isVid ? null : mediaUrl,
                 video: isVid ? mediaUrl : null,
@@ -425,10 +444,14 @@ const BookmarksAdmin = () => {
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label>Title</Label>
+                                            <Label>Title (EN)</Label>
                                             <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Resource Name" />
                                         </div>
                                         <div className="space-y-2">
+                                            <Label>Title (ES)</Label>
+                                            <Input value={titleEs} onChange={e => setTitleEs(e.target.value)} placeholder="Nombre del Recurso" />
+                                        </div>
+                                        <div className="space-y-2 col-span-2">
                                             <Label>Category</Label>
                                             <Select value={categoryId} onValueChange={setCategoryId}>
                                                 <SelectTrigger>
@@ -466,9 +489,15 @@ const BookmarksAdmin = () => {
                                         )}
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label>Description</Label>
-                                        <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Details..." />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label>Description (EN)</Label>
+                                            <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Details..." />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Description (ES)</Label>
+                                            <Textarea value={descriptionEs} onChange={e => setDescriptionEs(e.target.value)} placeholder="Detalles..." />
+                                        </div>
                                     </div>
 
                                     <DialogFooter>

@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { useQuotes, useProfile } from "@/hooks/use-db-data";
 
 const HeroSection = () => {
   const { t } = useTranslation();
   const { data: quotes, loading } = useQuotes();
   const { data: profile } = useProfile();
-  const [currentQuote, setCurrentQuote] = useState<{ text: string, author: string, background?: string | null } | null>(null);
+  // Allow full quote object or partial with optional text_es
+  const [currentQuote, setCurrentQuote] = useState<{ text: string, text_es?: string | null, author: string, background?: string | null } | null>(null);
   const [fade, setFade] = useState(false);
 
   useEffect(() => {
@@ -32,11 +34,13 @@ const HeroSection = () => {
   // Fallback default quote if no data
   const defaultQuote = {
     text: "Learn who you are.\nUnlearn who they told you to be.",
+    text_es: "Aprende quién eres.\nDesaprende quien te dijeron que fueras.",
     author: "s.mcnutt",
     background: null
   };
 
   const displayQuote = currentQuote || defaultQuote;
+  const quoteText = i18n.language === 'es' ? (displayQuote.text_es || displayQuote.text) : displayQuote.text;
 
   // Function to determine background style
   const getBackgroundStyle = (bg?: string | null) => {
@@ -55,20 +59,22 @@ const HeroSection = () => {
         </h1>
 
         <div className="space-y-4 mb-16">
-          {profile?.bio ? (
-            <p className="text-muted-foreground text-base leading-relaxed whitespace-pre-line max-w-3xl mx-auto">
-              {profile.bio}
-            </p>
-          ) : (
-            <>
-              <p className="text-muted-foreground text-base leading-relaxed">
-                {t("hero.description1")}
+          <div className="space-y-4 mb-16">
+            {profile ? (
+              <p className="text-muted-foreground text-base leading-relaxed whitespace-pre-line max-w-3xl mx-auto">
+                {i18n.language === 'es' ? (profile.bio_es || profile.bio) : (profile.bio || t("hero.description1"))}
               </p>
-              <p className="text-muted-foreground text-base leading-relaxed">
-                {t("hero.description2")}
-              </p>
-            </>
-          )}
+            ) : (
+              <>
+                <p className="text-muted-foreground text-base leading-relaxed">
+                  {t("hero.description1")}
+                </p>
+                <p className="text-muted-foreground text-base leading-relaxed">
+                  {t("hero.description2")}
+                </p>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Quote Card */}
@@ -100,7 +106,7 @@ const HeroSection = () => {
 
           <div className={`relative z-10 text-center transition-opacity duration-500 ${fade ? 'opacity-0' : 'opacity-100'}`}>
             <div className="text-foreground text-xl md:text-2xl font-serif italic mb-6 whitespace-pre-line">
-              {displayQuote.text.split('\n').map((line, i) => (
+              {quoteText.split('\n').map((line, i) => (
                 <p key={i} className="mb-2 last:mb-0">{line}</p>
               ))}
             </div>

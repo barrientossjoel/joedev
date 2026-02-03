@@ -36,14 +36,18 @@ const ProjectsAdmin = () => {
     // Form state
     const [number, setNumber] = useState("");
     const [title, setTitle] = useState("");
+    const [titleEs, setTitleEs] = useState("");
     const [description, setDescription] = useState("");
+    const [descriptionEs, setDescriptionEs] = useState("");
     const [image, setImage] = useState("");
     const [link, setLink] = useState("");
 
     const resetForm = () => {
         setNumber("");
         setTitle("");
+        setTitleEs("");
         setDescription("");
+        setDescriptionEs("");
         setImage("");
         setLink("");
         setEditingItem(null);
@@ -58,7 +62,9 @@ const ProjectsAdmin = () => {
         setEditingItem(item);
         setNumber(item.number);
         setTitle(item.title);
+        setTitleEs(item.title_es || "");
         setDescription(item.description);
+        setDescriptionEs(item.description_es || "");
         setImage(item.image);
         setLink(item.link || "");
         setIsOpen(true);
@@ -82,7 +88,15 @@ const ProjectsAdmin = () => {
         setIsLoading(true);
 
         try {
-            const values = { number, title, description, image, link };
+            const values = {
+                number,
+                title,
+                title_es: titleEs,
+                description,
+                description_es: descriptionEs,
+                image,
+                link
+            };
 
             if (editingItem) {
                 await db.update(schema.projects)
@@ -120,7 +134,7 @@ const ProjectsAdmin = () => {
                             Add Project
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>{editingItem ? "Edit Project" : "Add Project"}</DialogTitle>
                         </DialogHeader>
@@ -131,10 +145,15 @@ const ProjectsAdmin = () => {
                                     <Input value={number} onChange={e => setNumber(e.target.value)} required placeholder="01" />
                                 </div>
                                 <div className="space-y-2 col-span-3">
-                                    <Label>Title</Label>
+                                    <Label>Title (EN)</Label>
                                     <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Project Name" />
                                 </div>
                             </div>
+                            <div className="space-y-2">
+                                <Label>Title (ES)</Label>
+                                <Input value={titleEs} onChange={e => setTitleEs(e.target.value)} placeholder="Nombre del Proyecto" />
+                            </div>
+
                             <div className="space-y-2">
                                 <Label>Project Link</Label>
                                 <Input value={link} onChange={e => setLink(e.target.value)} placeholder="https://..." />
@@ -150,9 +169,15 @@ const ProjectsAdmin = () => {
                                     </div>
                                 )}
                             </div>
-                            <div className="space-y-2">
-                                <Label>Description</Label>
-                                <Textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Project details..." className="h-32" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Description (EN)</Label>
+                                    <Textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Project details..." className="h-32" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Description (ES)</Label>
+                                    <Textarea value={descriptionEs} onChange={e => setDescriptionEs(e.target.value)} placeholder="Detalles del proyecto..." className="h-32" />
+                                </div>
                             </div>
                             <DialogFooter>
                                 <Button type="submit" disabled={isLoading}>
