@@ -11,6 +11,13 @@ import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+const formatViews = (views: number) => {
+    if (views >= 1000) {
+        return (views / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    }
+    return views.toString();
+};
+
 const Article = () => {
     const { slug } = useParams();
     const { data: writings, loading } = useWritings();
@@ -43,10 +50,6 @@ const Article = () => {
             incrementView();
         }
     }, [slug, article?.id]); // Depend on ID to run once per article load
-
-    console.log("Slug param:", slug);
-    console.log("Writings count:", writings.length);
-    console.log("Found article:", article);
 
     if (!article) {
         return (
@@ -98,7 +101,7 @@ const Article = () => {
                  */}
                             <div className="flex items-center gap-1.5">
                                 <Eye size={14} />
-                                <span>{article.views} views</span>
+                                <span>{formatViews(article.views || 0)} views</span>
                             </div>
                         </div>
 

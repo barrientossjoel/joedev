@@ -10,7 +10,7 @@ async function main() {
     const allWritings = await db.select().from(writings);
     console.log("Found", allWritings.length, "writings");
     allWritings.forEach((w: typeof writings.$inferSelect) => {
-        console.log(`ID: ${w.id}, Title: ${w.title}, Slug: '${w.slug}', Link: '${w.link}'`);
+        console.log(`ID: ${w.id}, Title: ${w.title}, Slug: '${w.slug}', Views: '${w.views}', Type: ${typeof w.views}`);
     });
 }
 

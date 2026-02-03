@@ -2,6 +2,13 @@ import { useWritings } from "@/hooks/use-db-data";
 import i18n from "@/i18n";
 import { Link } from "react-router-dom";
 
+const formatViews = (views: number) => {
+  if (views >= 1000) {
+    return (views / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  }
+  return views.toString();
+};
+
 const WritingSection = () => {
   const { data: writings, loading } = useWritings();
 
@@ -35,7 +42,7 @@ const WritingSection = () => {
             <div className="col-span-6 text-sm text-muted-foreground group-hover:text-primary transition-colors font-medium">
               {title}
             </div>
-            <div className="col-span-2 text-muted-foreground text-sm text-right group-hover:text-primary transition-colors">{item.views}</div>
+            <div className="col-span-2 text-muted-foreground text-sm text-right group-hover:text-primary transition-colors">{formatViews(item.views || 0)}</div>
           </>
         );
 
