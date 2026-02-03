@@ -42,7 +42,7 @@ const MobileNav = ({ activeSection, onNavigate }: MobileNavProps) => {
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-sidebar border-t border-sidebar-border z-50 md:hidden">
-        <div className="flex justify-around items-center py-2">
+        <div className="grid grid-cols-5 w-full py-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
@@ -51,13 +51,13 @@ const MobileNav = ({ activeSection, onNavigate }: MobileNavProps) => {
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
-                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${isActive
+                className={`flex flex-col items-center justify-center gap-1 py-2 rounded-lg transition-colors ${isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
                   }`}
               >
                 <Icon size={20} />
-                <span className="text-xs">{t(item.label as any)}</span>
+                <span className="text-xs hidden min-[400px]:block truncate w-full px-1 text-center">{t(item.label as any)}</span>
               </button>
             );
           })}
