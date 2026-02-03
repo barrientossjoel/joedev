@@ -14,7 +14,7 @@ const getEnv = (key: string) => {
     return undefined;
 };
 
-const url = getEnv("VITE_DATABASE_URL");
+const url = getEnv("VITE_DATABASE_URL")?.replace("libsql://", "https://");
 const authToken = getEnv("VITE_DATABASE_AUTH_TOKEN");
 
 console.log("🔌 Connecting to DB:", url ? "Turso Cloud" : "Local Fallback");

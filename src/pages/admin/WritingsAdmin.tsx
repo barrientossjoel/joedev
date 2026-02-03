@@ -41,7 +41,6 @@ const WritingsAdmin = () => {
     const [slug, setSlug] = useState("");
     const [content, setContent] = useState("");
     const [contentEs, setContentEs] = useState("");
-    const [views, setViews] = useState("");
     const [link, setLink] = useState("");
 
     // Helper to track if user manually edited slug
@@ -66,7 +65,6 @@ const WritingsAdmin = () => {
         setSlug("");
         setContent("");
         setContentEs("");
-        setViews("0");
         setLink("");
         setEditingItem(null);
         setIsSlugManuallyEdited(false);
@@ -87,7 +85,6 @@ const WritingsAdmin = () => {
         setSlug(item.slug || "");
         setContent(item.content || "");
         setContentEs(item.content_es || "");
-        setViews(item.views);
         setLink(item.link || "");
         setIsOpen(true);
         setIsSlugManuallyEdited(true); // Don't auto-update slug when editing
@@ -119,7 +116,7 @@ const WritingsAdmin = () => {
                 slug,
                 content,
                 content_es: contentEs,
-                views,
+                // views is auto-managed
                 link
             };
 
@@ -129,7 +126,10 @@ const WritingsAdmin = () => {
                     .where(eq(schema.writings.id, editingItem.id));
                 toast.success("Article updated");
             } else {
-                await db.insert(schema.writings).values(values);
+                await db.insert(schema.writings).values({
+                    ...values,
+                    views: 0, // Initialize explicitly for new items
+                });
                 toast.success("Article created");
             }
 
@@ -224,11 +224,7 @@ const WritingsAdmin = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Views</Label>
-                                    <Input value={views} onChange={e => setViews(e.target.value)} required placeholder="0" />
-                                </div>
+                            <div className="grid grid-cols-1 gap-4">
                                 <div className="space-y-2">
                                     <Label>External Link (Optional)</Label>
                                     <Input value={link} onChange={e => setLink(e.target.value)} placeholder="https://... (overrides internal)" />

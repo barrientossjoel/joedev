@@ -21,7 +21,7 @@ export const writings = sqliteTable("writings", {
     slug: text("slug").notNull().unique(),
     content: text("content").notNull(),
     content_es: text("content_es"),
-    views: text("views").notNull(),
+    views: integer("views").default(0),
     link: text("link"),
 });
 

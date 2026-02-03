@@ -6,6 +6,10 @@ import Markdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
+import { useEffect } from "react";
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 const Article = () => {
     const { slug } = useParams();
@@ -20,6 +24,25 @@ const Article = () => {
     }
 
     const article = writings.find((w) => w.slug === slug);
+
+    // Increment view count on mount
+    useEffect(() => {
+        if (article) {
+            const incrementView = async () => {
+                try {
+                    // Simple increment. In a real app we'd use an API to not expose DB action
+                    // But here we are using direct DB access via client config
+                    const currentViews = article.views || 0;
+                    await db.update(schema.writings)
+                        .set({ views: currentViews + 1 })
+                        .where(eq(schema.writings.id, article.id));
+                } catch (e) {
+                    console.error("Failed to increment views", e);
+                }
+            };
+            incrementView();
+        }
+    }, [slug, article?.id]); // Depend on ID to run once per article load
 
     console.log("Slug param:", slug);
     console.log("Writings count:", writings.length);
