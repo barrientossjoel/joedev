@@ -87,7 +87,7 @@ const BookmarksSection = () => {
 
           {/* Mobile: Category Grid View */}
           <div className={`lg:hidden ${mobileView === 'detail' ? 'hidden' : 'block'}`}>
-            <h2 className="text-2xl font-semibold text-foreground mb-6 pl-16 -mt-2 md:pl-0 md:mt-0">Collections</h2>
+            <h2 className="text-2xl font-semibold text-foreground mb-6 pl-14 -mt-2 md:pl-0 md:mt-0">Collections</h2>
             <div className="grid grid-cols-2 gap-4">
               {categories.filter(c => !c.parentId).map((category) => {
                 const children = categories.filter(c => c.parentId === category.id);
@@ -162,7 +162,7 @@ const BookmarksSection = () => {
           {/* Mobile & Desktop: Bookmarks Detail View */}
           <div className={`${mobileView === 'list' ? 'hidden lg:block' : 'block'}`}>
             {/* Mobile Header with Back Button */}
-            <div className="flex items-center gap-4 mb-8 lg:hidden pl-16 -mt-2 md:pl-0 md:mt-0">
+            <div className="flex items-center gap-4 mb-8 lg:hidden pl-14 -mt-2 md:pl-0 md:mt-0">
               <button
                 onClick={() => setMobileView('list')}
                 className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors"
