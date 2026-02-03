@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuotes } from "@/hooks/use-db-data";
+import { useQuotes, useProfile } from "@/hooks/use-db-data";
 
 const HeroSection = () => {
   const { t } = useTranslation();
   const { data: quotes, loading } = useQuotes();
+  const { data: profile } = useProfile();
   const [currentQuote, setCurrentQuote] = useState<{ text: string, author: string, background?: string | null } | null>(null);
   const [fade, setFade] = useState(false);
 
@@ -54,12 +55,20 @@ const HeroSection = () => {
         </h1>
 
         <div className="space-y-4 mb-16">
-          <p className="text-muted-foreground text-base leading-relaxed">
-            {t("hero.description1")}
-          </p>
-          <p className="text-muted-foreground text-base leading-relaxed">
-            {t("hero.description2")}
-          </p>
+          {profile?.bio ? (
+            <p className="text-muted-foreground text-base leading-relaxed whitespace-pre-line max-w-3xl mx-auto">
+              {profile.bio}
+            </p>
+          ) : (
+            <>
+              <p className="text-muted-foreground text-base leading-relaxed">
+                {t("hero.description1")}
+              </p>
+              <p className="text-muted-foreground text-base leading-relaxed">
+                {t("hero.description2")}
+              </p>
+            </>
+          )}
         </div>
 
         {/* Quote Card */}

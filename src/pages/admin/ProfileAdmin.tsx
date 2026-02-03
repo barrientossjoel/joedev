@@ -14,6 +14,7 @@ const ProfileAdmin = () => {
     const { data: profile, loading } = useProfile();
     const [name, setName] = useState("");
     const [role, setRole] = useState("");
+    const [bio, setBio] = useState("");
     const [image, setImage] = useState(""); // Base64 or URL
     const [saving, setSaving] = useState(false);
 
@@ -21,6 +22,7 @@ const ProfileAdmin = () => {
         if (profile) {
             setName(profile.name);
             setRole(profile.role);
+            setBio(profile.bio || "");
             setImage(profile.image);
         }
     }, [profile]);
@@ -43,12 +45,12 @@ const ProfileAdmin = () => {
             if (profile) {
                 // Update
                 await db.update(schema.profile)
-                    .set({ name, role, image })
+                    .set({ name, role, bio, image })
                     .where(eq(schema.profile.id, profile.id));
                 toast.success("Profile updated successfully");
             } else {
                 // Create
-                await db.insert(schema.profile).values({ name, role, image });
+                await db.insert(schema.profile).values({ name, role, bio, image });
                 toast.success("Profile created successfully");
                 // Reload to refresh the hook state ideally, or we just rely on local state
                 window.location.reload();
@@ -115,6 +117,17 @@ const ProfileAdmin = () => {
                         onChange={e => setRole(e.target.value)}
                         placeholder="e.g. Frontend Developer"
                         required
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="bio">Bio / Home Description</Label>
+                    <textarea
+                        id="bio"
+                        value={bio}
+                        onChange={e => setBio(e.target.value)}
+                        placeholder="Describe yourself for the home page..."
+                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                 </div>
 

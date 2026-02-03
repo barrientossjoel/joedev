@@ -59,5 +59,6 @@ export const profile = sqliteTable("profile", {
     id: integer("id").primaryKey({ autoIncrement: true }),
     name: text("name").notNull(),
     role: text("role").notNull(),
+    bio: text("bio"), // For Home page description
     image: text("image").notNull(), // Base64 string
 });
