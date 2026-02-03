@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import SEO from "@/components/SEO";
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
 import HeroSection from "@/components/HeroSection";
@@ -46,6 +47,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Joel Barrientos | Full Stack Developer"
+        description="Portfolio of Joel Barrientos, a Full Stack Developer specializing in React, Node.js, and modern web technologies. View my projects and journey."
+        url="https://joedev.vercel.app/"
+      />
       {/* Desktop Sidebar */}
       <div className="hidden md:block">
         <Sidebar activeSection={activeSection} onNavigate={handleNavigate} />
