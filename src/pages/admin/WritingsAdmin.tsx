@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useWritings } from "@/hooks/use-db-data";
+import { useContentTranslator } from "@/hooks/use-content-translator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +22,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Loader2, Link as LinkIcon, Eye } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Link as LinkIcon, Eye, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
@@ -42,6 +43,34 @@ const WritingsAdmin = () => {
     const [content, setContent] = useState("");
     const [contentEs, setContentEs] = useState("");
     const [link, setLink] = useState("");
+
+    // Translation Hook
+    const { translate, isTranslating, hasKey } = useContentTranslator();
+
+    // Handle translation
+    const handleTranslate = async () => {
+        // Case 1: Translate EN -> ES
+        if (title && content) {
+            const result = await translate({ title, content }, 'es');
+            if (result) {
+                setTitleEs(result.title_es || "");
+                setContentEs(result.content_es || "");
+            }
+            return;
+        }
+
+        // Case 2: Translate ES -> EN
+        if (titleEs && contentEs) {
+            const result = await translate({ title: titleEs, content: contentEs }, 'en');
+            if (result) {
+                setTitle(result.title || "");
+                setContent(result.content || "");
+            }
+            return;
+        }
+
+        toast.info("Please fill Title and Content in one language to translate.");
+    };
 
     // Helper to track if user manually edited slug
     const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
@@ -152,93 +181,116 @@ const WritingsAdmin = () => {
                     <h1 className="text-2xl font-bold">Writings</h1>
                     <p className="text-muted-foreground">Manage your articles and posts.</p>
                 </div>
-                <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <Plus size={16} className="mr-2" />
-                            Add Article
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>{editingItem ? "Edit Article" : "Add Article"}</DialogTitle>
-                        </DialogHeader>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Year</Label>
-                                    <Input value={year} onChange={e => setYear(e.target.value)} required placeholder="2024" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Date</Label>
-                                    <Input value={date} onChange={e => setDate(e.target.value)} required placeholder="12/05" />
-                                </div>
-                            </div>
+                <div className="flex items-center gap-2">
+                    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+                        <DialogTrigger asChild>
+                            <Button>
+                                <Plus size={16} className="mr-2" />
+                                Add Article
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>{editingItem ? "Edit Article" : "Add Article"}</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                {/* Translation Toolbar */}
+                                {hasKey && (
+                                    <div className="flex justify-end">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleTranslate}
+                                            disabled={isTranslating || (!title && !titleEs)}
+                                            className="bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/50"
+                                        >
+                                            {isTranslating ? (
+                                                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                            ) : (
+                                                <Wand2 className="mr-2 h-3 w-3" />
+                                            )}
+                                            Auto-Translate
+                                        </Button>
+                                    </div>
+                                )}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Title (EN)</Label>
-                                    <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Article Title" />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label>Year</Label>
+                                        <Input value={year} onChange={e => setYear(e.target.value)} required placeholder="2024" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Date</Label>
+                                        <Input value={date} onChange={e => setDate(e.target.value)} required placeholder="12/05" />
+                                    </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Title (ES)</Label>
-                                    <Input value={titleEs} onChange={e => setTitleEs(e.target.value)} placeholder="Título del Artículo" />
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label>Title (EN)</Label>
+                                        <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Article Title" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Title (ES)</Label>
+                                        <Input value={titleEs} onChange={e => setTitleEs(e.target.value)} placeholder="Título del Artículo" />
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="space-y-2">
-                                <Label>Slug (URL)</Label>
-                                <Input
-                                    value={slug}
-                                    onChange={e => {
-                                        setSlug(e.target.value);
-                                        setIsSlugManuallyEdited(true);
-                                    }}
-                                    required
-                                    placeholder="article-title-slug"
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    URL: /writing/{slug}
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Content (EN - Markdown)</Label>
-                                    <Textarea
-                                        value={content}
-                                        onChange={e => setContent(e.target.value)}
+                                    <Label>Slug (URL)</Label>
+                                    <Input
+                                        value={slug}
+                                        onChange={e => {
+                                            setSlug(e.target.value);
+                                            setIsSlugManuallyEdited(true);
+                                        }}
                                         required
-                                        placeholder="# My Article content..."
-                                        className="min-h-[200px]"
+                                        placeholder="article-title-slug"
                                     />
+                                    <p className="text-xs text-muted-foreground">
+                                        URL: /writing/{slug}
+                                    </p>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Content (ES - Markdown)</Label>
-                                    <Textarea
-                                        value={contentEs}
-                                        onChange={e => setContentEs(e.target.value)}
-                                        placeholder="# Contenido del artículo..."
-                                        className="min-h-[200px]"
-                                    />
-                                </div>
-                            </div>
 
-                            <div className="grid grid-cols-1 gap-4">
-                                <div className="space-y-2">
-                                    <Label>External Link (Optional)</Label>
-                                    <Input value={link} onChange={e => setLink(e.target.value)} placeholder="https://... (overrides internal)" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label>Content (EN - Markdown)</Label>
+                                        <Textarea
+                                            value={content}
+                                            onChange={e => setContent(e.target.value)}
+                                            required
+                                            placeholder="# My Article content..."
+                                            className="min-h-[200px]"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Content (ES - Markdown)</Label>
+                                        <Textarea
+                                            value={contentEs}
+                                            onChange={e => setContentEs(e.target.value)}
+                                            placeholder="# Contenido del artículo..."
+                                            className="min-h-[200px]"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <DialogFooter>
-                                <Button type="submit" disabled={isLoading}>
-                                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Save
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+
+                                <div className="grid grid-cols-1 gap-4">
+                                    <div className="space-y-2">
+                                        <Label>External Link (Optional)</Label>
+                                        <Input value={link} onChange={e => setLink(e.target.value)} placeholder="https://... (overrides internal)" />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button type="submit" disabled={isLoading}>
+                                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Save
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
             <div className="border rounded-lg">

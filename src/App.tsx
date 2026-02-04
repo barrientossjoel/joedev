@@ -17,6 +17,7 @@ import WritingsAdmin from "./pages/admin/WritingsAdmin";
 import BookmarksAdmin from "./pages/admin/BookmarksAdmin";
 import ProfileAdmin from "./pages/admin/ProfileAdmin";
 import QuotesAdmin from "./pages/admin/QuotesAdmin";
+import SettingsAdmin from "./pages/admin/SettingsAdmin";
 import RequireAuth from "./components/RequireAuth";
 import AdminLayout from "./components/layouts/AdminLayout";
 
@@ -71,6 +72,11 @@ const App = () => (
                 <Route path="/admin/quotes" element={
                   <AdminLayout>
                     <QuotesAdmin />
+                  </AdminLayout>
+                } />
+                <Route path="/admin/settings" element={
+                  <AdminLayout>
+                    <SettingsAdmin />
                   </AdminLayout>
                 } />
               </Route>

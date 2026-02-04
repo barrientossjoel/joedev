@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useProjects } from "@/hooks/use-db-data";
+import { useContentTranslator } from "@/hooks/use-content-translator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +22,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
@@ -41,6 +42,34 @@ const ProjectsAdmin = () => {
     const [descriptionEs, setDescriptionEs] = useState("");
     const [image, setImage] = useState("");
     const [link, setLink] = useState("");
+
+    // Translation Hook
+    const { translate, isTranslating, hasKey } = useContentTranslator();
+
+    // Handle translation
+    const handleTranslate = async () => {
+        // Case 1: Translate EN -> ES
+        if (title && description) {
+            const result = await translate({ title, content: description }, 'es');
+            if (result) {
+                setTitleEs(result.title_es || "");
+                setDescriptionEs(result.content_es || "");
+            }
+            return;
+        }
+
+        // Case 2: Translate ES -> EN
+        if (titleEs && descriptionEs) {
+            const result = await translate({ title: titleEs, content: descriptionEs }, 'en');
+            if (result) {
+                setTitle(result.title || "");
+                setDescription(result.content || "");
+            }
+            return;
+        }
+
+        toast.info("Please fill Title and Description in one language to translate.");
+    };
 
     const resetForm = () => {
         setNumber("");
@@ -127,67 +156,90 @@ const ProjectsAdmin = () => {
                     <h1 className="text-2xl font-bold">Projects</h1>
                     <p className="text-muted-foreground">Manage your portfolio projects.</p>
                 </div>
-                <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <Plus size={16} className="mr-2" />
-                            Add Project
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>{editingItem ? "Edit Project" : "Add Project"}</DialogTitle>
-                        </DialogHeader>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="grid grid-cols-4 gap-4">
-                                <div className="space-y-2 col-span-1">
-                                    <Label>Number</Label>
-                                    <Input value={number} onChange={e => setNumber(e.target.value)} required placeholder="01" />
-                                </div>
-                                <div className="space-y-2 col-span-3">
-                                    <Label>Title (EN)</Label>
-                                    <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Project Name" />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Title (ES)</Label>
-                                <Input value={titleEs} onChange={e => setTitleEs(e.target.value)} placeholder="Nombre del Proyecto" />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Project Link</Label>
-                                <Input value={link} onChange={e => setLink(e.target.value)} placeholder="https://..." />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Image URL</Label>
-                                <div className="flex gap-2">
-                                    <Input value={image} onChange={e => setImage(e.target.value)} required placeholder="https://..." />
-                                </div>
-                                {image && (
-                                    <div className="mt-2 relative h-32 w-full overflow-hidden rounded-md border">
-                                        <img src={image} alt="Preview" className="object-cover w-full h-full opacity-80" />
+                <div className="flex items-center gap-2">
+                    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+                        <DialogTrigger asChild>
+                            <Button>
+                                <Plus size={16} className="mr-2" />
+                                Add Project
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>{editingItem ? "Edit Project" : "Add Project"}</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                {/* Translation Toolbar */}
+                                {hasKey && (
+                                    <div className="flex justify-end">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleTranslate}
+                                            disabled={isTranslating || (!title && !titleEs)}
+                                            className="bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/50"
+                                        >
+                                            {isTranslating ? (
+                                                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                            ) : (
+                                                <Wand2 className="mr-2 h-3 w-3" />
+                                            )}
+                                            Auto-Translate
+                                        </Button>
                                     </div>
                                 )}
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Description (EN)</Label>
-                                    <Textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Project details..." className="h-32" />
+
+                                <div className="grid grid-cols-4 gap-4">
+                                    <div className="space-y-2 col-span-1">
+                                        <Label>Number</Label>
+                                        <Input value={number} onChange={e => setNumber(e.target.value)} required placeholder="01" />
+                                    </div>
+                                    <div className="space-y-2 col-span-3">
+                                        <Label>Title (EN)</Label>
+                                        <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Project Name" />
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Description (ES)</Label>
-                                    <Textarea value={descriptionEs} onChange={e => setDescriptionEs(e.target.value)} placeholder="Detalles del proyecto..." className="h-32" />
+                                    <Label>Title (ES)</Label>
+                                    <Input value={titleEs} onChange={e => setTitleEs(e.target.value)} placeholder="Nombre del Proyecto" />
                                 </div>
-                            </div>
-                            <DialogFooter>
-                                <Button type="submit" disabled={isLoading}>
-                                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Save
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+
+                                <div className="space-y-2">
+                                    <Label>Project Link</Label>
+                                    <Input value={link} onChange={e => setLink(e.target.value)} placeholder="https://..." />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Image URL</Label>
+                                    <div className="flex gap-2">
+                                        <Input value={image} onChange={e => setImage(e.target.value)} required placeholder="https://..." />
+                                    </div>
+                                    {image && (
+                                        <div className="mt-2 relative h-32 w-full overflow-hidden rounded-md border">
+                                            <img src={image} alt="Preview" className="object-cover w-full h-full opacity-80" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label>Description (EN)</Label>
+                                        <Textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Project details..." className="h-32" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Description (ES)</Label>
+                                        <Textarea value={descriptionEs} onChange={e => setDescriptionEs(e.target.value)} placeholder="Detalles del proyecto..." className="h-32" />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button type="submit" disabled={isLoading}>
+                                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Save
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
             <div className="border rounded-lg">

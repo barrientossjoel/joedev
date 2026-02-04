@@ -10,6 +10,8 @@ export function useProjects() {
         queryFn: async () => {
             return await db.select().from(projects);
         },
+        staleTime: Infinity, // Projects rarely change
+        refetchOnWindowFocus: false,
     });
 
     return { data: data || [], loading, error };
@@ -21,6 +23,8 @@ export function useWritings() {
         queryFn: async () => {
             return await db.select().from(writings);
         },
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
     });
 
     return { data: data || [], loading, error };
@@ -37,6 +41,8 @@ export function useBookmarks(categoryId?: number) {
             }
             return await query;
         },
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        refetchOnWindowFocus: false,
     });
 
     return { data: data || [], loading, error };
@@ -48,6 +54,8 @@ export function useCategories() {
         queryFn: async () => {
             return await db.select().from(categories).orderBy(categories.name);
         },
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        refetchOnWindowFocus: false,
     });
 
     return { data: data || [], loading, error };
@@ -59,6 +67,8 @@ export function useJourney() {
         queryFn: async () => {
             return await db.select().from(schema.journey).orderBy(schema.journey.order);
         },
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
     });
 
     return { data: data || [], loading, error };
@@ -71,6 +81,8 @@ export function useProfile() {
             const res = await db.select().from(schema.profile).limit(1);
             return res[0];
         },
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
     });
 
     return { data, loading, error };
@@ -82,6 +94,8 @@ export function useQuotes() {
         queryFn: async () => {
             return await db.select().from(schema.quotes);
         },
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
     });
 
     return { data: data || [], loading, error };
@@ -108,7 +122,9 @@ export function useCategoryCoverImages() {
                 }
             });
             return map;
-        }
+        },
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        refetchOnWindowFocus: false,
     });
 
     return { data: data || {}, loading, error };

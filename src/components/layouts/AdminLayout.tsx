@@ -1,7 +1,7 @@
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Compass, Folder, Book, Bookmark, LogOut, Quote } from "lucide-react";
+import { LayoutDashboard, Compass, Folder, Book, Bookmark, LogOut, Quote, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
@@ -21,6 +21,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         { href: "/admin/bookmarks", icon: Bookmark, label: "Bookmarks" },
         { href: "/admin/quotes", icon: Quote, label: "Quotes" },
         { href: "/admin/profile", icon: LayoutDashboard, label: "Profile" },
+        { href: "/admin/settings", icon: Settings, label: "Settings" },
     ];
 
     return (
