@@ -107,7 +107,10 @@ export const Particles = () => {
             winSize.current = { w: window.innerWidth, h: window.innerHeight };
         }
 
-        const newParticles = Array.from({ length: 130 }).map((_, i) => ({
+        const isMobile = window.innerWidth < 768;
+        const particleCount = isMobile ? 80 : 130;
+
+        const newParticles = Array.from({ length: particleCount }).map((_, i) => ({
             id: i,
             x: Math.random() * 100,
             y: Math.random() * 100,
