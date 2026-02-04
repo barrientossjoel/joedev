@@ -108,7 +108,7 @@ export const Particles = () => {
         }
 
         const isMobile = window.innerWidth < 768;
-        const particleCount = isMobile ? 80 : 130;
+        const particleCount = isMobile ? 60 : 130;
 
         const newParticles = Array.from({ length: particleCount }).map((_, i) => ({
             id: i,
