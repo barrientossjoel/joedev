@@ -105,6 +105,10 @@ export const Particles = () => {
 
     useEffect(() => {
         setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (!mounted) return;
 
         const updateDimensions = () => {
             if (containerRef.current) {
@@ -119,7 +123,8 @@ export const Particles = () => {
         };
 
         // Initial measurement
-        updateDimensions();
+        // Small timeout to ensure layout is settled after mount
+        const timeoutId = setTimeout(updateDimensions, 0);
 
         const isMobile = window.innerWidth < 768;
         const particleCount = isMobile ? 60 : 130;
@@ -155,11 +160,12 @@ export const Particles = () => {
         }
 
         return () => {
+            clearTimeout(timeoutId);
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("resize", handleResize);
             if (resizeObserver) resizeObserver.disconnect();
         };
-    }, []);
+    }, [mounted, mouseX, mouseY]);
 
     if (!mounted) return null;
 
