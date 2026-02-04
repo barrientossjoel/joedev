@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
 import { useQuotes, useProfile } from "@/hooks/use-db-data";
+import { Particles } from "./Particles";
 
 const HeroSection = () => {
   const { t } = useTranslation();
@@ -52,8 +53,9 @@ const HeroSection = () => {
   };
 
   return (
-    <section id="home" className="min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-12 lg:px-20 max-w-5xl mx-auto w-full">
-      <div className="animate-fade-in text-center w-full">
+    <section id="home" className="min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-12 lg:px-20 max-w-5xl mx-auto w-full relative bg-background z-0">
+      <Particles />
+      <div className="relative z-10 animate-fade-in text-center w-full">
         <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-10">
           {t("hero.welcome")}
         </h1>
