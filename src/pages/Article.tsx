@@ -77,7 +77,7 @@ const Article = () => {
                 description={`Read ${title} by Joel Barrientos.`}
                 type="article"
             />
-            <div className="min-h-screen bg-background text-foreground">
+            <div className="min-h-screen text-foreground">
                 <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
                     <Link
                         to="/#writing"

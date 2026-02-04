@@ -46,7 +46,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <SEO
         title="Joel Barrientos | Full Stack Developer"
         description="Portfolio of Joel Barrientos, a Full Stack Developer specializing in React, Node.js, and modern web technologies. View my projects and journey."

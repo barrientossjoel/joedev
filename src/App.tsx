@@ -20,6 +20,8 @@ import QuotesAdmin from "./pages/admin/QuotesAdmin";
 import RequireAuth from "./components/RequireAuth";
 import AdminLayout from "./components/layouts/AdminLayout";
 
+import { Background } from "./components/Background";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -27,6 +29,7 @@ const App = () => (
     <HelmetProvider>
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <TooltipProvider>
+          <Background />
           <Toaster />
           <Sonner />
           <BrowserRouter>
