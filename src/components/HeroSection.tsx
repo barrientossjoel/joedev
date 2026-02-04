@@ -53,9 +53,9 @@ const HeroSection = () => {
   };
 
   return (
-    <section id="home" className="min-h-screen flex flex-col justify-center items-center py-20 px-6 md:px-12 lg:px-20 max-w-5xl mx-auto w-full relative bg-background z-0">
+    <section id="home" className="min-h-screen w-full relative bg-background z-0 flex flex-col justify-center items-center py-20">
       <Particles />
-      <div className="relative z-10 animate-fade-in text-center w-full">
+      <div className="w-full max-w-5xl mx-auto px-6 md:px-12 lg:px-20 relative z-10 animate-fade-in text-center">
         <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-10">
           {t("hero.welcome")}
         </h1>
