@@ -59,7 +59,7 @@ const BookmarksSection = () => {
   if (!categories.length) return null;
 
   return (
-    <section id="bookmarks" className="min-h-screen flex w-full bg-background border-t border-border">
+    <section id="bookmarks" className="min-h-screen flex w-full border-t border-border">
       {/* Desktop Categories Sidebar */}
       <div className="w-64 shrink-0 border-r border-border p-6 hidden lg:block sticky top-0 h-screen overflow-y-auto">
         <div className="flex items-center justify-between mb-8">
