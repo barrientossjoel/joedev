@@ -64,9 +64,12 @@ const SettingsAdmin = () => {
                             </p>
                         </div>
                     </CardContent>
-                    <CardFooter>
+                    <CardFooter className="flex gap-2">
                         <Button onClick={handleSave}>
                             <Check className="mr-2 h-4 w-4" /> Save Key
+                        </Button>
+                        <Button variant="outline" onClick={testConnection}>
+                            ⚡ Test Connection
                         </Button>
                     </CardFooter>
                 </Card>
@@ -76,3 +79,61 @@ const SettingsAdmin = () => {
 };
 
 export default SettingsAdmin;
+
+function testConnection() {
+    const key = localStorage.getItem("gemini_api_key");
+    if (!key) {
+        toast.error("Please Save Key first.");
+        return;
+    }
+
+    toast.promise(async () => {
+        // Step 1: List Models (Checks Auth & Region separately from Model Generation)
+        const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`;
+
+        const response = await fetch(listUrl);
+        const data = await response.json();
+
+        if (!response.ok) {
+            const errorDetails = data.error?.message || response.statusText;
+            console.error("List Models Error:", data);
+
+            if (response.status === 403) {
+                throw new Error("403: Invalid API Key. (ListModels failed)");
+            } else {
+                throw new Error(`Connection Error (${response.status}): ${errorDetails}`);
+            }
+        }
+
+        // Step 2: Find a usable model
+        const models = data.models || [];
+        const availableModel = models.find((m: any) =>
+            m.supportedGenerationMethods?.includes("generateContent") &&
+            (m.name.includes("flash") || m.name.includes("pro"))
+        );
+
+        if (!availableModel) {
+            console.warn("Available models:", models);
+            throw new Error("Connected, but no suitable Chat models found for this key.");
+        }
+
+        // Step 3: Test Generation with that specific model
+        const genUrl = `https://generativelanguage.googleapis.com/v1beta/${availableModel.name}:generateContent?key=${key}`;
+        const genResp = await fetch(genUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: "Hello" }] }] })
+        });
+
+        if (!genResp.ok) {
+            const err = await genResp.json();
+            throw new Error(`Gen Error with ${availableModel.name}: ${err.error?.message}`);
+        }
+
+        return `Success! Connected via ${availableModel.name} 🚀`;
+    }, {
+        loading: 'Checking available models...',
+        success: (msg) => msg,
+        error: (err) => `Failed: ${err.message}`
+    });
+}

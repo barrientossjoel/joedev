@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useProjects } from "@/hooks/use-db-data";
 import { useContentTranslator } from "@/hooks/use-content-translator";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ const ProjectsAdmin = () => {
     const { data: projects, loading } = useProjects();
     const [isOpen, setIsOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<typeof schema.projects.$inferSelect | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+
 
     // Form state
     const [number, setNumber] = useState("");
@@ -112,39 +113,81 @@ const ProjectsAdmin = () => {
         }
     };
 
+    const queryClient = useQueryClient();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
 
-        try {
-            const values = {
-                number,
-                title,
-                title_es: titleEs,
-                description,
-                description_es: descriptionEs,
-                image,
-                link
-            };
+        // Manual Validation: Ensure at least one language is complete
+        const hasEn = title.trim() && description.trim();
+        const hasEs = titleEs.trim() && descriptionEs.trim();
 
-            if (editingItem) {
-                await db.update(schema.projects)
-                    .set(values)
-                    .where(eq(schema.projects.id, editingItem.id));
-                toast.success("Project updated");
-            } else {
-                await db.insert(schema.projects).values(values);
-                toast.success("Project created");
-            }
-
-            setIsOpen(false);
-            window.location.reload();
-        } catch (e) {
-            toast.error("Failed to save project");
-            console.error(e);
-        } finally {
-            setIsLoading(false);
+        if (!hasEn && !hasEs) {
+            toast.error("Please fill Title and Description in at least one language.");
+            return;
         }
+
+        // Optimistic UI: Close immediately
+        setIsOpen(false);
+        const toastId = toast.loading("Saving project in background...");
+
+        // Background Process
+        (async () => {
+            try {
+                // Auto-translate if needed
+                let finalTitleEs = titleEs;
+                let finalDescriptionEs = descriptionEs;
+                let finalTitle = title;
+                let finalDescription = description;
+
+                if (hasKey) {
+                    // Case 1: EN -> ES
+                    if (hasEn && !hasEs) {
+                        const result = await translate({ title, content: description }, 'es');
+                        if (result) {
+                            finalTitleEs = result.title_es || finalTitleEs;
+                            finalDescriptionEs = result.content_es || finalDescriptionEs;
+                        }
+                    }
+                    // Case 2: ES -> EN
+                    else if (hasEs && !hasEn) {
+                        const result = await translate({ title: titleEs, content: descriptionEs }, 'en');
+                        if (result) {
+                            finalTitle = result.title || finalTitle;
+                            finalDescription = result.content || finalDescription;
+                        }
+                    }
+                }
+
+                const values = {
+                    number,
+                    title: finalTitle,
+                    title_es: finalTitleEs,
+                    description: finalDescription,
+                    description_es: finalDescriptionEs,
+                    image,
+                    link
+                };
+
+                if (editingItem) {
+                    await db.update(schema.projects)
+                        .set(values)
+                        .where(eq(schema.projects.id, editingItem.id));
+                } else {
+                    await db.insert(schema.projects).values(values);
+                }
+
+                // Invalidate query
+                await queryClient.invalidateQueries({ queryKey: ["projects"] });
+
+                toast.dismiss(toastId);
+                toast.success("Project saved successfully!");
+            } catch (e) {
+                console.error(e);
+                toast.dismiss(toastId);
+                toast.error("Failed to save project in background.");
+            }
+        })();
     };
 
     if (loading) return <div>Loading...</div>;
@@ -197,7 +240,7 @@ const ProjectsAdmin = () => {
                                     </div>
                                     <div className="space-y-2 col-span-3">
                                         <Label>Title (EN)</Label>
-                                        <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Project Name" />
+                                        <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Project Name" />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
@@ -223,7 +266,7 @@ const ProjectsAdmin = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label>Description (EN)</Label>
-                                        <Textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Project details..." className="h-32" />
+                                        <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Project details..." className="h-32" />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>Description (ES)</Label>
@@ -231,8 +274,7 @@ const ProjectsAdmin = () => {
                                     </div>
                                 </div>
                                 <DialogFooter>
-                                    <Button type="submit" disabled={isLoading}>
-                                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    <Button type="submit">
                                         Save
                                     </Button>
                                 </DialogFooter>

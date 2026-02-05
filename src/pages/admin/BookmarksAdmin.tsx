@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useBookmarks, useCategories } from "@/hooks/use-db-data";
 import { useContentTranslator } from "@/hooks/use-content-translator";
 import { Button } from "@/components/ui/button";
@@ -194,7 +195,6 @@ const BookmarksAdmin = () => {
 
     const [isOpen, setIsOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<typeof schema.bookmarks.$inferSelect | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
 
     // Selection state
     const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
@@ -305,44 +305,98 @@ const BookmarksAdmin = () => {
         return /\.(mp4|webm|mov|mkv)(\?|$|#)/i.test(url);
     };
 
+    const queryClient = useQueryClient();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
 
-        try {
-            const newCategoryId = categoryId ? parseInt(categoryId) : null;
+        // Manual Validation
+        const hasEn = title.trim(); // Description is optional
+        const hasEs = titleEs.trim();
 
-            const isVid = isVideo(mediaUrl);
-            const values = {
-                title,
-                title_es: titleEs,
-                description,
-                description_es: descriptionEs,
-                link,
-                image: isVid ? null : mediaUrl,
-                video: isVid ? mediaUrl : null,
-                count,
-                categoryId: newCategoryId
-            };
+        if (!hasEn && !hasEs) {
+            toast.error("Please provide a Title in at least one language.");
+            return;
+        }
 
-            if (editingItem) {
-                await db.update(schema.bookmarks)
-                    .set(values)
-                    .where(eq(schema.bookmarks.id, editingItem.id));
+        // Optimistic UI: Close immediately
+        setIsOpen(false);
+        const toastId = toast.loading("Saving bookmark in background...");
 
-                // Handle Category Count Update if Changed
-                // 1. If category changed
-                if (editingItem.categoryId !== newCategoryId) {
-                    // Decrement old
-                    if (editingItem.categoryId) {
-                        const oldCat = categories.find(c => c.id === editingItem.categoryId);
-                        if (oldCat) {
-                            await db.update(schema.categories)
-                                .set({ count: oldCat.count > 0 ? oldCat.count - 1 : 0 })
-                                .where(eq(schema.categories.id, oldCat.id));
+        // Background Process
+        (async () => {
+            try {
+                const newCategoryId = categoryId ? parseInt(categoryId) : null;
+
+                const isVid = isVideo(mediaUrl);
+
+                // Auto-translate if needed
+                let finalTitleEs = titleEs;
+                let finalDescriptionEs = descriptionEs;
+                let finalTitle = title;
+                let finalDescription = description;
+
+                if (hasKey) {
+                    // Case 1: EN -> ES (Description is optional in bookmarks, but we translate if present)
+                    if (hasEn && !hasEs) {
+                        const result = await translate({ title, content: description || " " }, 'es');
+                        if (result) {
+                            finalTitleEs = result.title_es || finalTitleEs;
+                            finalDescriptionEs = result.content_es || finalDescriptionEs;
                         }
                     }
-                    // Increment new
+                    // Case 2: ES -> EN
+                    else if (hasEs && !hasEn) {
+                        const result = await translate({ title: titleEs, content: descriptionEs || " " }, 'en');
+                        if (result) {
+                            finalTitle = result.title || finalTitle;
+                            finalDescription = result.content || finalDescription;
+                        }
+                    }
+                }
+
+                const values = {
+                    title: finalTitle,
+                    title_es: finalTitleEs,
+                    description: finalDescription,
+                    description_es: finalDescriptionEs,
+                    link,
+                    image: isVid ? null : mediaUrl,
+                    video: isVid ? mediaUrl : null,
+                    count,
+                    categoryId: newCategoryId
+                };
+
+                if (editingItem) {
+                    await db.update(schema.bookmarks)
+                        .set(values)
+                        .where(eq(schema.bookmarks.id, editingItem.id));
+
+                    // Handle Category Count Update if Changed
+                    if (editingItem.categoryId !== newCategoryId) {
+                        // Decrement old
+                        if (editingItem.categoryId) {
+                            const oldCat = categories.find(c => c.id === editingItem.categoryId);
+                            if (oldCat) {
+                                await db.update(schema.categories)
+                                    .set({ count: oldCat.count > 0 ? oldCat.count - 1 : 0 })
+                                    .where(eq(schema.categories.id, oldCat.id));
+                            }
+                        }
+                        // Increment new
+                        if (newCategoryId) {
+                            const newCat = categories.find(c => c.id === newCategoryId);
+                            if (newCat) {
+                                await db.update(schema.categories)
+                                    .set({ count: newCat.count + 1 })
+                                    .where(eq(schema.categories.id, newCat.id));
+                            }
+                        }
+                    }
+                } else {
+                    await db.insert(schema.bookmarks).values(values);
+
+                    // Increment category count
                     if (newCategoryId) {
                         const newCat = categories.find(c => c.id === newCategoryId);
                         if (newCat) {
@@ -353,31 +407,21 @@ const BookmarksAdmin = () => {
                     }
                 }
 
-                toast.success("Bookmark updated");
-            } else {
-                await db.insert(schema.bookmarks).values(values);
+                // Invalidate both bookmarks and categories
+                await Promise.all([
+                    queryClient.invalidateQueries({ queryKey: ["bookmarks"] }),
+                    queryClient.invalidateQueries({ queryKey: ["categories"] })
+                ]);
 
-                // Increment category count
-                if (newCategoryId) {
-                    const newCat = categories.find(c => c.id === newCategoryId);
-                    if (newCat) {
-                        await db.update(schema.categories)
-                            .set({ count: newCat.count + 1 })
-                            .where(eq(schema.categories.id, newCat.id));
-                    }
-                }
+                toast.dismiss(toastId);
+                toast.success("Bookmark saved successfully!");
 
-                toast.success("Bookmark created");
+            } catch (e) {
+                console.error(e);
+                toast.dismiss(toastId);
+                toast.error("Failed to save bookmark in background.");
             }
-
-            setIsOpen(false);
-            window.location.reload();
-        } catch (e) {
-            toast.error("Failed to save bookmark");
-            console.error(e);
-        } finally {
-            setIsLoading(false);
-        }
+        })();
     };
 
     if (bookmarksLoading || categoriesLoading) return <div>Loading...</div>;
@@ -495,7 +539,7 @@ const BookmarksAdmin = () => {
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <Label>Title (EN)</Label>
-                                                <Input value={title} onChange={e => setTitle(e.target.value)} required placeholder="Resource Name" />
+                                                <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Resource Name" />
                                             </div>
                                             <div className="space-y-2">
                                                 <Label>Title (ES)</Label>
@@ -551,8 +595,7 @@ const BookmarksAdmin = () => {
                                         </div>
 
                                         <DialogFooter>
-                                            <Button type="submit" disabled={isLoading}>
-                                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            <Button type="submit">
                                                 Save
                                             </Button>
                                         </DialogFooter>

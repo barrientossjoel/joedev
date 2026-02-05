@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useWritings } from "@/hooks/use-db-data";
 import { useContentTranslator } from "@/hooks/use-content-translator";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ const WritingsAdmin = () => {
     const { data: writings, loading } = useWritings();
     const [isOpen, setIsOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<typeof schema.writings.$inferSelect | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+
 
     // Form state
     const [year, setYear] = useState("");
@@ -132,44 +133,87 @@ const WritingsAdmin = () => {
         }
     };
 
+    const queryClient = useQueryClient();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
 
-        try {
-            const values = {
-                year,
-                date,
-                title,
-                title_es: titleEs,
-                slug,
-                content,
-                content_es: contentEs,
-                // views is auto-managed
-                link
-            };
+        // Manual Validation: Ensure at least one language is complete
+        const hasEn = title.trim() && content.trim();
+        const hasEs = titleEs.trim() && contentEs.trim();
 
-            if (editingItem) {
-                await db.update(schema.writings)
-                    .set(values)
-                    .where(eq(schema.writings.id, editingItem.id));
-                toast.success("Article updated");
-            } else {
-                await db.insert(schema.writings).values({
-                    ...values,
-                    views: 0, // Initialize explicitly for new items
-                });
-                toast.success("Article created");
-            }
-
-            setIsOpen(false);
-            window.location.reload();
-        } catch (e) {
-            toast.error("Failed to save article");
-            console.error(e);
-        } finally {
-            setIsLoading(false);
+        if (!hasEn && !hasEs) {
+            toast.error("Please fill Title and Content in at least one language.");
+            return;
         }
+
+        // Optimistic UI: Close immediately
+        setIsOpen(false);
+        const toastId = toast.loading("Saving article in background...");
+
+        // Background Process
+        (async () => {
+            try {
+                // Auto-translate if needed (before saving)
+                let finalTitleEs = titleEs;
+                let finalContentEs = contentEs;
+                let finalTitle = title;
+                let finalContent = content;
+
+                if (hasKey) {
+                    // Case 1: EN -> ES (if ES is missing)
+                    if (hasEn && !hasEs) {
+                        const result = await translate({ title, content }, 'es');
+                        if (result) {
+                            finalTitleEs = result.title_es || finalTitleEs;
+                            finalContentEs = result.content_es || finalContentEs;
+                        }
+                    }
+                    // Case 2: ES -> EN (if EN is missing)
+                    else if (hasEs && !hasEn) {
+                        const result = await translate({ title: titleEs, content: contentEs }, 'en');
+                        if (result) {
+                            finalTitle = result.title || finalTitle;
+                            finalContent = result.content || finalContent;
+                        }
+                    }
+                }
+
+                const values = {
+                    year,
+                    date,
+                    title: finalTitle,
+                    title_es: finalTitleEs,
+                    slug,
+                    content: finalContent,
+                    content_es: finalContentEs,
+                    // views is auto-managed
+                    link
+                };
+
+                if (editingItem) {
+                    await db.update(schema.writings)
+                        .set(values)
+                        .where(eq(schema.writings.id, editingItem.id));
+                } else {
+                    await db.insert(schema.writings).values({
+                        ...values,
+                        views: 0,
+                    });
+                }
+
+                // Invalidate query to refresh list
+                await queryClient.invalidateQueries({ queryKey: ["writings"] });
+
+                toast.dismiss(toastId);
+                toast.success("Article saved successfully!");
+
+            } catch (e) {
+                console.error(e);
+                toast.dismiss(toastId);
+                toast.error("Failed to save article in background.");
+            }
+        })();
     };
 
     if (loading) return <div>Loading...</div>;
@@ -282,8 +326,7 @@ const WritingsAdmin = () => {
                                     </div>
                                 </div>
                                 <DialogFooter>
-                                    <Button type="submit" disabled={isLoading}>
-                                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    <Button type="submit">
                                         Save
                                     </Button>
                                 </DialogFooter>

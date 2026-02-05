@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Check } from "lucide-react";
+import { Check, Globe } from "lucide-react";
 
 import {
     DropdownMenu,
@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export function LanguageSwitcher() {
-    const { i18n, t } = useTranslation();
+    const { i18n } = useTranslation();
 
     const languages = [
         { code: "en", label: "English" },
@@ -20,8 +20,9 @@ export function LanguageSwitcher() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground hover:text-foreground">
-                    <span className="text-xs">{t("sidebar.language")}</span>
+                <Button variant="outline" size="icon">
+                    <Globe className="h-[1.2rem] w-[1.2rem]" />
+                    <span className="sr-only">Toggle language</span>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

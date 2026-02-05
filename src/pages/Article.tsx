@@ -11,6 +11,9 @@ import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+
 const formatViews = (views: number) => {
     if (views >= 1000) {
         return (views / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
@@ -77,6 +80,12 @@ const Article = () => {
                 description={`Read ${title} by Joel Barrientos.`}
                 type="article"
             />
+            {/* Fixed Controls */}
+            <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+                <ThemeToggle />
+                <LanguageSwitcher />
+            </div>
+
             <div className="min-h-screen text-foreground">
                 <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
                     <Link

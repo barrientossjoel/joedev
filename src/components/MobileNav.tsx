@@ -1,5 +1,6 @@
 import { Home, PenLine, Compass, Sun, Bookmark } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const navItems = [
   { id: "home", icon: Home, label: "sidebar.nav.home" },
@@ -16,7 +17,7 @@ interface MobileNavProps {
 
 import { ThemeToggle } from "./ThemeToggle";
 
-// ... existing code ...
+
 
 import { useProfile } from "@/hooks/use-db-data";
 
@@ -26,8 +27,9 @@ const MobileNav = ({ activeSection, onNavigate }: MobileNavProps) => {
   return (
     <>
       {/* Floating Theme Toggle for Mobile */}
-      <div className="fixed top-4 right-4 z-50 md:hidden">
+      <div className="fixed top-4 right-4 z-50 md:hidden flex items-center gap-2">
         <ThemeToggle />
+        <LanguageSwitcher />
       </div>
 
       {/* Floating Profile for Mobile */}

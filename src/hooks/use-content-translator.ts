@@ -34,17 +34,17 @@ export const useContentTranslator = () => {
             return null;
         }
 
-        setIsTranslating(true);
-        try {
-            const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        if (!apiKey.startsWith("AIza")) {
+            toast.error("Invalid API Key format. Must start with 'AIza'.");
+            return null;
+        }
 
-            const targetLangName = targetLanguage === 'es' ? "Spanish (Argentina - 'vos', professional but friendly)" : "English (Professional US English)";
-            const outputKeys = targetLanguage === 'es'
-                ? '"title_es", "content_es", "description_es"'
-                : '"title", "content", "description"';
+        const targetLangName = targetLanguage === 'es' ? "Spanish (Argentina - 'vos', professional but friendly)" : "English (Professional US English)";
+        const outputKeys = targetLanguage === 'es'
+            ? '"title_es", "content_es", "description_es"'
+            : '"title", "content", "description"';
 
-            const prompt = `
+        const translationPrompt = `
             You are a professional translator and copywriter specialized in software portfolios.
             Translate the following content to ${targetLangName}.
             
@@ -59,7 +59,40 @@ export const useContentTranslator = () => {
             Content: ${input.content}
             `;
 
-            const result = await model.generateContent(prompt);
+        setIsTranslating(true);
+        try {
+            // Dynamic Model Discovery
+            // We fetch the list of models available to this key to avoid 404s on specific versions
+            let modelName = "gemini-1.5-flash"; // Default fallback
+
+            try {
+                const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+                const listResp = await fetch(listUrl);
+                if (listResp.ok) {
+                    const data = await listResp.json();
+                    const models = data.models || [];
+                    // Prefer Flash, then Pro, then anything capable of generateContent
+                    const bestModel = models.find((m: any) =>
+                        m.supportedGenerationMethods?.includes("generateContent") &&
+                        m.name.includes("flash")
+                    ) || models.find((m: any) =>
+                        m.supportedGenerationMethods?.includes("generateContent") &&
+                        m.name.includes("pro")
+                    );
+
+                    if (bestModel) {
+                        modelName = bestModel.name.replace("models/", "");
+                        console.log("Auto-detected best model:", modelName);
+                    }
+                }
+            } catch (e) {
+                console.warn("Failed to list models, using default:", e);
+            }
+
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: modelName });
+
+            const result = await model.generateContent(translationPrompt);
             const response = result.response;
             const text = response.text();
 
@@ -67,11 +100,44 @@ export const useContentTranslator = () => {
             const jsonStr = text.replace(/```json/g, "").replace(/```/g, "").trim();
             const translated = JSON.parse(jsonStr);
 
-            toast.success(`Content translated to ${targetLanguage.toUpperCase()}! 🪄`);
+            toast.success(`Translated! 🪄`);
             return translated;
-        } catch (error) {
-            console.error("Translation failed:", error);
-            toast.error("Translation failed. Check your API Key.");
+        } catch (error: any) {
+            console.warn("Primary attempt failed, trying robust fallbacks...", error);
+
+            // Hardcoded Fallback Strategy (if dynamic failed)
+            const fallbacks = ["gemini-1.5-pro", "gemini-pro", "gemini-1.0-pro"];
+
+            for (const fallbackModel of fallbacks) {
+                try {
+                    console.log(`Retrying with ${fallbackModel}...`);
+                    const genAI = new GoogleGenerativeAI(apiKey);
+                    const model = genAI.getGenerativeModel({ model: fallbackModel });
+
+                    const result = await model.generateContent(translationPrompt);
+                    const response = result.response;
+                    const text = response.text();
+
+                    const jsonStr = text.replace(/```json/g, "").replace(/```/g, "").trim();
+                    const translated = JSON.parse(jsonStr);
+
+                    toast.success(`Translated (fallback)! 🪄`);
+                    return translated;
+                } catch (retryError) {
+                    continue;
+                }
+            }
+
+            console.error("All translation attempts failed.");
+            const errorMessage = error?.message || "Unknown error";
+
+            if (errorMessage.includes("API key not valid")) {
+                toast.error("Invalid API Key. Please check your settings.");
+            } else if (errorMessage.includes("429")) {
+                toast.error("Quota exceeded. Try again later.");
+            } else {
+                toast.error(`Translation failed. Check permissions.`);
+            }
             return null;
         } finally {
             setIsTranslating(false);

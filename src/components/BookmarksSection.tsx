@@ -48,6 +48,7 @@ const BookmarksSection = () => {
   const { data: categories } = useCategories();
   const [activeCategory, setActiveCategory] = useState("Apps & Tools");
   const [mobileView, setMobileView] = useState<"list" | "detail" | { type: "detail-modal", item: any }>("list");
+  const [categoryViewMode, setCategoryViewMode] = useState<"grid" | "list">("grid");
   const { data: categoryImages } = useCategoryCoverImages();
 
   // Find active category ID to filter bookmarks
@@ -130,82 +131,132 @@ const BookmarksSection = () => {
       <div className="flex-1 p-6 md:p-12">
         <div className="max-w-7xl mx-auto">
 
-          {/* Mobile: Category Grid View */}
+          {/* Mobile: Category Grid/List View */}
           <div className={`lg:hidden ${mobileView === 'detail' ? 'hidden' : 'block'}`}>
-            <h2 className="text-2xl font-semibold text-foreground mb-6 pl-14 -mt-2 md:pl-0 md:mt-0">Collections</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {categories.filter(c => !c.parentId).map((category) => {
-                const children = categories.filter(c => c.parentId === category.id);
-                const catName = i18n.language === 'es' ? (category.name_es || category.name) : category.name;
-                return (
-                  <div key={category.id} className="contents">
-                    <button
-                      onClick={() => {
-                        setActiveCategory(catName);
-                        setMobileView('detail');
-                      }}
-                      className="p-6 rounded-xl border border-border bg-card hover:bg-muted/50 transition-all text-left flex flex-col gap-2 group relative overflow-hidden"
-                    >
-                      {/* Background Image on Hover */}
-                      {categoryImages[category.id] && (
-                        <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="absolute inset-0 bg-black/60 z-10" />
-                          <img
-                            src={categoryImages[category.id]}
-                            alt=""
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-
-                      <div className="relative z-10">
-                        <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">
-                          {catName}
-                        </h3>
-                        <span className="text-sm text-muted-foreground">{category.count} bookmarks</span>
-                      </div>
-                    </button>
-
-                    {/* Children */}
-                    {children.map(child => {
-                      const childName = i18n.language === 'es' ? (child.name_es || child.name) : child.name;
-                      return (
-                        <button
-                          key={child.id}
-                          onClick={() => {
-                            setActiveCategory(childName);
-                            setMobileView('detail');
-                          }}
-                          className="p-6 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-all text-left flex flex-col gap-2 group relative overflow-hidden"
-                        >
-                          {/* Background Image on Hover for children too if available */}
-                          {categoryImages[child.id] && (
-                            <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <div className="absolute inset-0 bg-black/60 z-10" />
-                              <img
-                                src={categoryImages[child.id]}
-                                alt=""
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          )}
-
-                          <div className="absolute top-3 right-3 text-xs text-muted-foreground px-2 py-1 bg-background rounded-full border z-20">
-                            in {catName}
-                          </div>
-                          <div className="relative z-10">
-                            <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">
-                              {childName}
-                            </h3>
-                            <span className="text-sm text-muted-foreground">{child.count} bookmarks</span>
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                );
-              })}
+            <div className="flex items-center justify-between mb-6 pl-14 -mt-2 md:pl-0 md:mt-0 pr-2">
+              <h2 className="text-2xl font-semibold text-foreground">Collections</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCategoryViewMode(prev => prev === 'grid' ? 'list' : 'grid')}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <List size={20} />
+              </Button>
             </div>
+            {categoryViewMode === 'grid' ? (
+              <div className="grid grid-cols-2 gap-4">
+                {categories.filter(c => !c.parentId).map((category) => {
+                  const children = categories.filter(c => c.parentId === category.id);
+                  const catName = i18n.language === 'es' ? (category.name_es || category.name) : category.name;
+                  return (
+                    <div key={category.id} className="contents">
+                      <button
+                        onClick={() => {
+                          setActiveCategory(catName);
+                          setMobileView('detail');
+                        }}
+                        className="p-6 rounded-xl border border-border bg-card hover:bg-muted/50 transition-all text-left flex flex-col gap-2 group relative overflow-hidden"
+                      >
+                        {/* Background Image on Hover */}
+                        {categoryImages[category.id] && (
+                          <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute inset-0 bg-black/60 z-10" />
+                            <img
+                              src={categoryImages[category.id]}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+
+                        <div className="relative z-10">
+                          <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">
+                            {catName}
+                          </h3>
+                          <span className="text-sm text-muted-foreground">{category.count} bookmarks</span>
+                        </div>
+                      </button>
+
+                      {/* Children */}
+                      {children.map(child => {
+                        const childName = i18n.language === 'es' ? (child.name_es || child.name) : child.name;
+                        return (
+                          <button
+                            key={child.id}
+                            onClick={() => {
+                              setActiveCategory(childName);
+                              setMobileView('detail');
+                            }}
+                            className="p-6 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-all text-left flex flex-col gap-2 group relative overflow-hidden"
+                          >
+                            {/* Background Image on Hover for children too if available */}
+                            {categoryImages[child.id] && (
+                              <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <div className="absolute inset-0 bg-black/60 z-10" />
+                                <img
+                                  src={categoryImages[child.id]}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+
+                            <div className="absolute top-3 right-3 text-xs text-muted-foreground px-2 py-1 bg-background rounded-full border z-20">
+                              in {catName}
+                            </div>
+                            <div className="relative z-10">
+                              <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">
+                                {childName}
+                              </h3>
+                              <span className="text-sm text-muted-foreground">{child.count} bookmarks</span>
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {categories.filter(c => !c.parentId).map((category) => {
+                  const children = categories.filter(c => c.parentId === category.id);
+                  const catName = i18n.language === 'es' ? (category.name_es || category.name) : category.name;
+                  return (
+                    <div key={category.id} className="contents">
+                      <button
+                        onClick={() => {
+                          setActiveCategory(catName);
+                          setMobileView('detail');
+                        }}
+                        className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                      >
+                        <span className="text-base text-muted-foreground">{catName}</span>
+                        <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{category.count}</span>
+                      </button>
+
+                      {children.map(child => {
+                        const childName = i18n.language === 'es' ? (child.name_es || child.name) : child.name;
+                        return (
+                          <button
+                            key={child.id}
+                            onClick={() => {
+                              setActiveCategory(childName);
+                              setMobileView('detail');
+                            }}
+                            className="w-full flex items-center justify-between p-3 pl-8 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                          >
+                            <span className="text-base text-muted-foreground">{childName}</span>
+                            <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{child.count}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Mobile & Desktop: Bookmarks Detail View */}
@@ -237,49 +288,81 @@ const BookmarksSection = () => {
                       <div
                         key={bookmark.id}
                         onClick={() => setMobileView({ type: 'detail-modal', item: bookmark })}
-                        className="rounded-xl border border-border bg-card overflow-hidden hover:border-muted-foreground/50 transition-colors cursor-pointer group flex flex-col h-full"
+                        className="group relative rounded-xl border border-border bg-card overflow-hidden hover:border-muted-foreground/50 transition-colors cursor-pointer flex flex-col h-full 
+                        md: block lg:flex" // Reset flexibility on mobile to allow absolute positioning tricks if needed, or just use grid/stack
                       >
-                        {/* Image/Video area */}
-                        <div className="h-32 bg-muted/30 relative overflow-hidden shrink-0">
-                          {bookmark.video ? (
-                            <VideoPreview src={bookmark.video} />
-                          ) : bookmark.image ? (
-                            <img
-                              src={bookmark.image}
-                              alt={title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-muted/10 text-muted-foreground">
-                              <List size={24} opacity={0.2} />
+                        {/* Mobile: Square Card with Full Background */}
+                        <div className="lg:hidden aspect-square relative w-full">
+                          {/* Image/Video Background */}
+                          <div className="absolute inset-0 z-0">
+                            {bookmark.video ? (
+                              <VideoPreview src={bookmark.video} />
+                            ) : bookmark.image ? (
+                              <img
+                                src={bookmark.image}
+                                alt={title}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-muted/10">
+                                <List size={24} className="text-muted-foreground/20" />
+                              </div>
+                            )}
+                            {/* Dark Gradient Overlay for Readability */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
+                          </div>
+
+                          {/* Content Overlay */}
+                          <div className="absolute bottom-0 left-0 right-0 p-4 z-20 text-white">
+                            <h4 className="font-semibold text-sm mb-1 leading-tight line-clamp-2 text-white">{title}</h4>
+                            <div className="text-[10px] text-white/70 flex items-center gap-2">
+                              <span>{bookmark.count || 0} saves</span>
                             </div>
-                          )}
+                          </div>
                         </div>
 
-                        {/* Content */}
-                        <div className="p-3 flex flex-col flex-1">
-                          <h4 className="text-foreground font-medium text-sm mb-1 leading-tight">{title}</h4>
-                          <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed flex-1">{description}</p>
 
-                          <div className="mt-2 pt-2 border-t border-border/50 flex items-center justify-between text-[10px] text-muted-foreground">
-                            <span>{bookmark.count || 0} saves</span>
-                            {bookmark.link && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 -mr-2 px-3 hover:bg-primary/10 hover:text-primary text-primary font-medium"
-                                asChild
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <a
-                                  href={bookmark.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  {t("projects.visit")}
-                                </a>
-                              </Button>
+                        {/* Desktop: Original Card Layout (Hidden on Mobile) */}
+                        <div className="hidden lg:flex flex-col h-full">
+                          <div className="h-32 bg-muted/30 relative overflow-hidden shrink-0">
+                            {bookmark.video ? (
+                              <VideoPreview src={bookmark.video} />
+                            ) : bookmark.image ? (
+                              <img
+                                src={bookmark.image}
+                                alt={title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-muted/10 text-muted-foreground">
+                                <List size={24} opacity={0.2} />
+                              </div>
                             )}
+                          </div>
+
+                          <div className="p-3 flex flex-col flex-1">
+                            <h4 className="text-foreground font-medium text-sm mb-1 leading-tight">{title}</h4>
+                            <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed flex-1">{description}</p>
+                            <div className="mt-2 pt-2 border-t border-border/50 flex items-center justify-between text-[10px] text-muted-foreground">
+                              <span>{bookmark.count || 0} saves</span>
+                              {bookmark.link && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 -mr-2 px-3 hover:bg-primary/10 hover:text-primary text-primary font-medium"
+                                  asChild
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <a
+                                    href={bookmark.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    {t("projects.visit")}
+                                  </a>
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>

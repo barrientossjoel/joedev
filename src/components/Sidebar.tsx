@@ -130,10 +130,8 @@ const Sidebar = ({ activeSection, onNavigate }: SidebarProps) => {
 
       {/* Theme Toggle */}
       <div className="mt-auto px-4 pt-4">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-          </div>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
           <LanguageSwitcher />
         </div>
       </div>
