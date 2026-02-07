@@ -109,7 +109,7 @@ export function Terminal() {
                 animate={{ opacity: 1, scale: 1 }}
                 whileHover={{ scale: 1.1 }}
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-4 right-4 z-50 p-3 bg-card border border-border rounded-full shadow-lg hover:shadow-primary/20 transition-all text-primary"
+                className="fixed bottom-4 right-4 z-50 h-10 w-10 flex items-center justify-center bg-card border border-border rounded-md shadow-lg hover:shadow-primary/20 transition-all text-primary"
                 aria-label="Open Terminal"
             >
                 <TerminalIcon size={24} />
