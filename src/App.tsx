@@ -22,72 +22,86 @@ import RequireAuth from "./components/RequireAuth";
 import AdminLayout from "./components/layouts/AdminLayout";
 
 import { Background } from "./components/Background";
+import { Terminal } from "./components/Terminal";
+import { useKonamiCode } from "./hooks/use-konami-code";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <HelmetProvider>
-      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-        <TooltipProvider>
-          <Background />
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/writing/:slug" element={<Article />} />
-              <Route path="/admin/login" element={<Login />} />
-              <Route element={<RequireAuth />}>
-                <Route path="/admin" element={
-                  <AdminLayout>
-                    <Dashboard />
-                  </AdminLayout>
-                } />
-                <Route path="/admin/journey" element={
-                  <AdminLayout>
-                    <JourneyAdmin />
-                  </AdminLayout>
-                } />
-                <Route path="/admin/projects" element={
-                  <AdminLayout>
-                    <ProjectsAdmin />
-                  </AdminLayout>
-                } />
-                <Route path="/admin/writings" element={
-                  <AdminLayout>
-                    <WritingsAdmin />
-                  </AdminLayout>
-                } />
-                <Route path="/admin/bookmarks" element={
-                  <AdminLayout>
-                    <BookmarksAdmin />
-                  </AdminLayout>
-                } />
-                <Route path="/admin/profile" element={
-                  <AdminLayout>
-                    <ProfileAdmin />
-                  </AdminLayout>
-                } />
-                <Route path="/admin/quotes" element={
-                  <AdminLayout>
-                    <QuotesAdmin />
-                  </AdminLayout>
-                } />
-                <Route path="/admin/settings" element={
-                  <AdminLayout>
-                    <SettingsAdmin />
-                  </AdminLayout>
-                } />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Analytics />
-          </BrowserRouter>
-        </TooltipProvider>
-      </ThemeProvider>
-    </HelmetProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  useKonamiCode();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+          <TooltipProvider>
+            <Background />
+            <Terminal />
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/writing/:slug" element={<Article />} />
+                <Route path="/admin/login" element={<Login />} />
+                <Route element={<RequireAuth />}>
+                  <Route path="/admin" element={
+                    <AdminLayout>
+                      <Dashboard />
+                    </AdminLayout>
+                  } />
+                  <Route path="/admin/journey" element={
+                    <AdminLayout>
+                      <JourneyAdmin />
+                    </AdminLayout>
+                  } />
+                  <Route path="/admin/projects" element={
+                    <AdminLayout>
+                      <ProjectsAdmin />
+                    </AdminLayout>
+                  } />
+                  <Route path="/admin/writings" element={
+                    <AdminLayout>
+                      <WritingsAdmin />
+                    </AdminLayout>
+                  } />
+                  <Route path="/admin/bookmarks" element={
+                    <AdminLayout>
+                      <BookmarksAdmin />
+                    </AdminLayout>
+                  } />
+                  <Route path="/admin/profile" element={
+                    <AdminLayout>
+                      <ProfileAdmin />
+                    </AdminLayout>
+                  } />
+                  <Route path="/admin/quotes" element={
+                    <AdminLayout>
+                      <QuotesAdmin />
+                    </AdminLayout>
+                  } />
+                  <Route path="/admin/settings" element={
+                    <AdminLayout>
+                      <SettingsAdmin />
+                    </AdminLayout>
+                  } />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Analytics />
+            </BrowserRouter>
+          </TooltipProvider>
+        </ThemeProvider>
+      </HelmetProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
