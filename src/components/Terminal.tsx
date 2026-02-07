@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Minus, Square, Terminal as TerminalIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Pet } from './Pet';
 import { Game } from './Game';
@@ -109,10 +110,13 @@ export function Terminal() {
                 animate={{ opacity: 1, scale: 1 }}
                 whileHover={{ scale: 1.1 }}
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-4 right-4 z-50 h-10 w-10 flex items-center justify-center bg-card border border-border rounded-md shadow-lg hover:shadow-primary/20 transition-all text-primary"
+                className={cn(
+                    buttonVariants({ variant: "outline", size: "icon" }),
+                    "fixed bottom-4 right-4 z-50 shadow-lg"
+                )}
                 aria-label="Open Terminal"
             >
-                <TerminalIcon size={24} />
+                <TerminalIcon className="h-[1.2rem] w-[1.2rem]" />
             </motion.button>
         );
     }
@@ -120,12 +124,13 @@ export function Terminal() {
     return (
         <AnimatePresence>
             <motion.div
-                initial={{ opacity: 0, y: 100, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
+                initial={{ opacity: 0, y: 100, scale: 0.9, height: 384 }}
+                animate={{ opacity: 1, y: 0, scale: 1, height: isMinimized ? 48 : 384 }}
                 exit={{ opacity: 0, y: 100, scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className={cn(
-                    "fixed bottom-4 right-4 z-50 bg-neutral-950 border border-border rounded-lg shadow-2xl overflow-hidden font-mono text-sm w-full max-w-lg transition-all duration-300",
-                    isMinimized ? "h-12" : "h-96"
+                    "fixed bottom-4 right-4 z-50 bg-neutral-950 border border-border rounded-lg shadow-2xl overflow-hidden font-mono text-sm w-full max-w-lg",
+                    // Removed transition-all and height classes to let framer handle it
                 )}
             >
                 {/* Title Bar */}
