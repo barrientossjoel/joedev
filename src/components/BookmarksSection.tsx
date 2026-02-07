@@ -43,6 +43,81 @@ const VideoPreview = ({ src }: { src: string }) => {
   );
 };
 
+const BookmarkModalContent = ({ item, activeCategory }: { item: any, activeCategory: string }) => {
+  const [layout, setLayout] = useState<"stacked" | "side-by-side">("stacked");
+  // const { t } = useTranslation(); // Helper if needed, though mostly using i18n directly here
+
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth, naturalHeight } = e.currentTarget;
+    if (naturalHeight >= naturalWidth) {
+      setLayout("side-by-side");
+    }
+  };
+
+  const title = i18n.language === 'es' ? (item.title_es || item.title) : item.title;
+  const description = i18n.language === 'es' ? (item.description_es || item.description) : item.description;
+
+  return (
+    <div className={`flex flex-col gap-6 ${layout === "side-by-side" ? "md:flex-row" : ""}`}>
+      {/* Media Section */}
+      <div className={`${layout === "side-by-side" ? "md:w-1/2 flex items-center justify-center bg-background/50 rounded-lg border border-border/50" : "w-full"}`}>
+        {item.video ? (
+          <div className="rounded-md overflow-hidden border bg-background w-full">
+            <video
+              src={item.video}
+              className="w-full h-auto max-h-[60vh] object-contain"
+              controls
+              autoPlay
+              muted
+              loop
+            />
+          </div>
+        ) : item.image && (
+          <div className="rounded-md overflow-hidden border bg-background relative group w-full">
+            <img
+              src={item.image}
+              alt={title}
+              onLoad={handleImageLoad}
+              className={`w-full h-auto object-contain ${layout === "side-by-side" ? "max-h-[70vh]" : "max-h-[50vh]"}`}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Content Section */}
+      <div className={`flex flex-col gap-4 ${layout === "side-by-side" ? "md:w-1/2 justify-center" : "w-full"}`}>
+        <div>
+          <h4 className="font-semibold text-xl text-foreground mb-2 leading-tight">{title}</h4>
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+            {description || "No description provided."}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 text-sm mt-4">
+          <div className="bg-muted/30 p-3 rounded-lg border border-border/50">
+            <span className="text-muted-foreground block text-xs uppercase tracking-wider mb-1">Category</span>
+            <span className="font-medium text-foreground">{activeCategory}</span>
+          </div>
+          <div className="bg-muted/30 p-3 rounded-lg border border-border/50">
+            <span className="text-muted-foreground block text-xs uppercase tracking-wider mb-1">Saves/Visits</span>
+            <span className="font-medium text-foreground">{item.count}</span>
+          </div>
+        </div>
+
+        {item.link && (
+          <div className="pt-4 mt-auto">
+            <Button asChild className="w-full h-12 text-base shadow-sm hover:shadow-md transition-all">
+              <a href={item.link} target="_blank" rel="noopener noreferrer">
+                Visit Resource <ExternalLink className="ml-2 size-5" />
+              </a>
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const BookmarksSection = () => {
   const { t } = useTranslation();
   const { data: categories } = useCategories();
@@ -53,7 +128,7 @@ const BookmarksSection = () => {
 
   // Find active category ID to filter bookmarks
   const activeCategoryId = categories.find(c => (i18n.language === 'es' ? (c.name_es || c.name) : c.name) === activeCategory)?.id
-    || categories.find(c => c.name === activeCategory)?.id; // Fallback to English name lookup if localized lookup fails (shouldn't if consistent)
+    || categories.find(c => c.name === activeCategory)?.id;
 
   const { data: bookmarks, loading } = useBookmarks(activeCategoryId);
 
@@ -70,7 +145,6 @@ const BookmarksSection = () => {
 
         <div className="space-y-1">
           <Accordion type="single" collapsible className="w-full">
-            {/* 1. Render Root Categories (those without parent) */}
             {categories.filter(c => !c.parentId).map((category) => {
               const children = categories.filter(c => c.parentId === category.id);
               const catName = i18n.language === 'es' ? (category.name_es || category.name) : category.name;
@@ -108,7 +182,6 @@ const BookmarksSection = () => {
                 );
               }
 
-              // No children, simple button
               return (
                 <button
                   key={category.id}
@@ -158,7 +231,6 @@ const BookmarksSection = () => {
                         }}
                         className="p-6 rounded-xl border border-border bg-card hover:bg-muted/50 transition-all text-left flex flex-col gap-2 group relative overflow-hidden"
                       >
-                        {/* Background Image on Hover */}
                         {categoryImages[category.id] && (
                           <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <div className="absolute inset-0 bg-black/60 z-10" />
@@ -178,7 +250,6 @@ const BookmarksSection = () => {
                         </div>
                       </button>
 
-                      {/* Children */}
                       {children.map(child => {
                         const childName = i18n.language === 'es' ? (child.name_es || child.name) : child.name;
                         return (
@@ -190,7 +261,6 @@ const BookmarksSection = () => {
                             }}
                             className="p-6 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-all text-left flex flex-col gap-2 group relative overflow-hidden"
                           >
-                            {/* Background Image on Hover for children too if available */}
                             {categoryImages[child.id] && (
                               <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <div className="absolute inset-0 bg-black/60 z-10" />
@@ -261,7 +331,6 @@ const BookmarksSection = () => {
 
           {/* Mobile & Desktop: Bookmarks Detail View */}
           <div className={`${mobileView === 'list' ? 'hidden lg:block' : 'block'}`}>
-            {/* Mobile Header with Back Button */}
             <div className="flex items-center gap-4 mb-8 lg:hidden pl-14 -mt-2 md:pl-0 md:mt-0">
               <button
                 onClick={() => setMobileView('list')}
@@ -273,7 +342,6 @@ const BookmarksSection = () => {
               <h3 className="text-2xl font-semibold text-foreground">{activeCategory}</h3>
             </div>
 
-            {/* Desktop Header */}
             <h3 className="text-3xl font-semibold text-foreground mb-8 hidden lg:block">{activeCategory}</h3>
 
             {loading ? (
@@ -289,11 +357,9 @@ const BookmarksSection = () => {
                         key={bookmark.id}
                         onClick={() => setMobileView({ type: 'detail-modal', item: bookmark })}
                         className="group relative rounded-xl border border-border bg-card overflow-hidden hover:border-muted-foreground/50 transition-colors cursor-pointer flex flex-col h-full 
-                        md: block lg:flex" // Reset flexibility on mobile to allow absolute positioning tricks if needed, or just use grid/stack
+                        md: block lg:flex"
                       >
-                        {/* Mobile: Square Card with Full Background */}
                         <div className="lg:hidden aspect-square relative w-full">
-                          {/* Image/Video Background */}
                           <div className="absolute inset-0 z-0">
                             {bookmark.video ? (
                               <VideoPreview src={bookmark.video} />
@@ -308,11 +374,8 @@ const BookmarksSection = () => {
                                 <List size={24} className="text-muted-foreground/20" />
                               </div>
                             )}
-                            {/* Dark Gradient Overlay for Readability */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
                           </div>
-
-                          {/* Content Overlay */}
                           <div className="absolute bottom-0 left-0 right-0 p-4 z-20 text-white">
                             <h4 className="font-semibold text-sm mb-1 leading-tight line-clamp-2 text-white">{title}</h4>
                             <div className="text-[10px] text-white/70 flex items-center gap-2">
@@ -321,8 +384,6 @@ const BookmarksSection = () => {
                           </div>
                         </div>
 
-
-                        {/* Desktop: Original Card Layout (Hidden on Mobile) */}
                         <div className="hidden lg:flex flex-col h-full">
                           <div className="h-32 bg-muted/30 relative overflow-hidden shrink-0">
                             {bookmark.video ? (
@@ -370,68 +431,14 @@ const BookmarksSection = () => {
                   })}
                 </div>
 
-                <Dialog open={typeof mobileView === 'object' && mobileView?.type === 'detail-modal'} onOpenChange={(open) => !open && setMobileView('list')}>
-                  <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>
-                        {mobileView && typeof mobileView === 'object' && 'item' in mobileView ? (
-                          i18n.language === 'es' ? (mobileView.item.title_es || mobileView.item.title) : mobileView.item.title
-                        ) : ''}
-                      </DialogTitle>
+                <Dialog open={typeof mobileView === 'object' && mobileView?.type === 'detail-modal'} onOpenChange={(open) => !open && setMobileView('detail')}>
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6 md:p-8">
+                    <DialogHeader className="sr-only">
+                      <DialogTitle>Bookmark Details</DialogTitle>
                     </DialogHeader>
-                    {(mobileView as any).item && (
-                      <div className="space-y-6">
-                        {(mobileView as any).item.video ? (
-                          <div className="rounded-md overflow-hidden border">
-                            <video
-                              src={(mobileView as any).item.video}
-                              className="w-full h-auto max-h-[400px] object-contain bg-background"
-                              controls
-                              autoPlay
-                              muted
-                              loop
-                            />
-                          </div>
-                        ) : (mobileView as any).item.image && (
-                          <div className="rounded-md overflow-hidden border">
-                            <img
-                              src={(mobileView as any).item.image}
-                              alt={(mobileView as any).item.title}
-                              className="w-full h-auto max-h-[400px] object-contain bg-background"
-                            />
-                          </div>
-                        )}
 
-                        <div>
-                          <h4 className="font-semibold text-sm text-muted-foreground mb-1">Description</h4>
-                          <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                            {(mobileView as any).item
-                              ? (i18n.language === 'es' ? ((mobileView as any).item.description_es || (mobileView as any).item.description) : (mobileView as any).item.description) || "No description provided."
-                              : ""}
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="text-muted-foreground block mb-1">Category</span>
-                            <span className="font-medium">{activeCategory}</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground block mb-1">Saves/Visits</span>
-                            <span className="font-medium">{(mobileView as any).item.count}</span>
-                          </div>
-                        </div>
-
-                        {(mobileView as any).item.link && (
-                          <div className="pt-4">
-                            <Button asChild className="w-full size-lg text-lg h-12">
-                              <a href={(mobileView as any).item.link} target="_blank" rel="noopener noreferrer">
-                                Visit Resource <ExternalLink className="ml-2 size-5" />
-                              </a>
-                            </Button>
-                          </div>
-                        )}
-                      </div>
+                    {mobileView && typeof mobileView === 'object' && 'item' in mobileView && (
+                      <BookmarkModalContent item={(mobileView as any).item} activeCategory={activeCategory} />
                     )}
                   </DialogContent>
                 </Dialog>

@@ -129,7 +129,7 @@ export function Terminal() {
                 exit={{ opacity: 0, y: 100, scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className={cn(
-                    "fixed bottom-4 right-4 z-50 bg-neutral-950 border border-border rounded-lg shadow-2xl overflow-hidden font-mono text-sm w-[calc(100vw-2rem)] sm:w-full sm:max-w-lg",
+                    "fixed bottom-4 right-4 z-50 bg-background border border-border rounded-lg shadow-2xl overflow-hidden font-mono text-sm w-[calc(100vw-2rem)] sm:w-full sm:max-w-lg",
                     // Removed transition-all and height classes to let framer handle it
                 )}
             >
