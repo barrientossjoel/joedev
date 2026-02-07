@@ -124,12 +124,12 @@ export function Terminal() {
     return (
         <AnimatePresence>
             <motion.div
-                initial={{ opacity: 0, y: 100, scale: 0.9, height: 384 }}
-                animate={{ opacity: 1, y: 0, scale: 1, height: isMinimized ? 48 : 384 }}
+                initial={{ opacity: 0, y: 100, scale: 0.9, height: "55vh" }}
+                animate={{ opacity: 1, y: 0, scale: 1, height: isMinimized ? 48 : "55vh" }}
                 exit={{ opacity: 0, y: 100, scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className={cn(
-                    "fixed bottom-4 right-4 z-50 bg-neutral-950 border border-border rounded-lg shadow-2xl overflow-hidden font-mono text-sm w-full max-w-lg",
+                    "fixed bottom-4 right-4 z-50 bg-neutral-950 border border-border rounded-lg shadow-2xl overflow-hidden font-mono text-sm w-[calc(100vw-2rem)] sm:w-full sm:max-w-lg",
                     // Removed transition-all and height classes to let framer handle it
                 )}
             >

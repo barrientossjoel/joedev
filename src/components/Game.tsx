@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 
 // --- Types ---
-type GameState = 'MENU' | 'ROOM_SELECTION' | 'COMBAT' | 'EVENT' | 'GAME_OVER' | 'VICTORY' | 'CHARACTER' | 'INVENTORY';
+type GameState = 'MENU' | 'ROOM_SELECTION' | 'COMBAT' | 'EVENT' | 'GAME_OVER' | 'VICTORY' | 'CHARACTER' | 'INVENTORY' | 'CONFIRM_EXIT';
 type RoomType = 'ENEMY' | 'ELITE' | 'TREASURE' | 'REST' | 'EVENT';
 type ItemType = 'WEAPON' | 'ARMOR' | 'ACCESSORY' | 'CONSUMABLE';
 
@@ -164,6 +164,7 @@ interface GameProps {
 export function Game({ onExit }: GameProps) {
     // --- State ---
     const [gameState, setGameState] = useState<GameState>('MENU');
+    const [previousState, setPreviousState] = useState<GameState>('MENU');
     const [player, setPlayer] = useState<Player>(BASE_PLAYER);
     const [rooms, setRooms] = useState<Room[]>([]);
     const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
@@ -252,8 +253,6 @@ export function Game({ onExit }: GameProps) {
 
             const pWithItems = { ...prev, equipped: newEquipped, inventory: newInventory };
             const pWithStats = calculateStats(pWithItems);
-            // Ensure HP doesn't exceed new MaxHP (or stay weirdly high/low) is tricky, 
-            // but for now let's just clamp current HP to new MaxHP
             pWithStats.hp = Math.min(pWithStats.hp, pWithStats.maxHp);
 
             addLog(`Equipped ${item.name}.`);
@@ -334,7 +333,6 @@ export function Game({ onExit }: GameProps) {
         } else {
             // Victory
             const xpGain = enemy.isElite ? 50 : 20;
-            // Chance for item drop from enemy
             const loot = generateLoot(player.floor);
 
             addLog(`Victory! +${xpGain} XP`);
@@ -363,7 +361,7 @@ export function Game({ onExit }: GameProps) {
                     hp: Math.min(newBaseMaxHp, p.hp + 20), // Small heal on win
                     inventory: loot ? [...p.inventory, loot] : p.inventory
                 };
-                return calculateStats(newP); // Recalculate derived stats
+                return calculateStats(newP);
             });
             finishRoom();
         }
@@ -380,39 +378,57 @@ export function Game({ onExit }: GameProps) {
     // --- Keyboard Handling ---
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-
             // Global Toggles
-            if (e.key === 'Escape') {
-                setIsFocused(false);
-                containerRef.current?.blur();
-                return; // Let it bubble up so terminal might handle it
-            }
-
             // Capture logic
             if (!isFocused && e.target !== containerRef.current) {
-                // If not focused on game, do nothing (allow terminal typing)
                 return;
             }
 
-            // If focused, prevent defaults to stop scrolling/typing in other inputs?
             e.stopPropagation();
             if (isFocused) {
-                if (e.key.length === 1 || ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Backspace'].includes(e.key)) {
+                if (e.key.length === 1 || ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Backspace', 'Escape'].includes(e.key)) {
                     e.preventDefault();
                 }
             }
 
+            if (gameState === 'CONFIRM_EXIT') {
+                if (e.key.toLowerCase() === 'y' || e.key === 'Enter') {
+                    if (onExit) onExit();
+                }
+                if (e.key.toLowerCase() === 'n' || e.key === 'Escape') {
+                    setGameState(previousState);
+                }
+                return;
+            }
+
+            // Global Q to Quit
+            if (['MENU', 'ROOM_SELECTION', 'COMBAT', 'EVENT', 'CHARACTER', 'INVENTORY'].includes(gameState)) {
+                if (e.key.toLowerCase() === 'q') {
+                    setPreviousState(gameState);
+                    setGameState('CONFIRM_EXIT');
+                    return;
+                }
+            }
 
             if (gameState === 'MENU') {
                 if (e.key === 'Enter') startGame();
-                if (e.key.toLowerCase() === 'q' && onExit) onExit();
             } else if (gameState === 'ROOM_SELECTION') {
                 const num = parseInt(e.key);
                 if (!isNaN(num) && num > 0 && num <= rooms.length) {
                     handleRoomSelect(num - 1);
                 }
-                if (e.key.toLowerCase() === 'c') setGameState('CHARACTER');
-                if (e.key.toLowerCase() === 'i') setGameState('INVENTORY');
+                if (e.key.toLowerCase() === 'c') {
+                    setPreviousState('ROOM_SELECTION');
+                    setGameState('CHARACTER');
+                }
+                if (e.key.toLowerCase() === 'i') {
+                    setPreviousState('ROOM_SELECTION');
+                    setGameState('INVENTORY');
+                }
+                if (e.key === 'Escape') {
+                    setIsFocused(false);
+                    containerRef.current?.blur();
+                }
             } else if (gameState === 'COMBAT') {
                 if (e.key === '1') combatAction('ATTACK');
                 if (e.key === '2') combatAction('DEFEND');
@@ -423,11 +439,9 @@ export function Game({ onExit }: GameProps) {
                 if (e.key === 'Enter') setGameState('MENU');
             } else if (gameState === 'CHARACTER' || gameState === 'INVENTORY') {
                 if (e.key === 'Escape' || e.key.toLowerCase() === 'c' || e.key.toLowerCase() === 'i') {
-                    setGameState('ROOM_SELECTION'); // Return to game
+                    setGameState(previousState);
                 }
-
                 if (gameState === 'INVENTORY') {
-                    // Inventory hotkeys 1-9
                     const num = parseInt(e.key);
                     if (!isNaN(num) && num > 0 && num <= player.inventory.length) {
                         equipItem(player.inventory[num - 1]);
@@ -453,7 +467,7 @@ export function Game({ onExit }: GameProps) {
                 container.removeEventListener('blur', handleBlur);
             }
         };
-    }, [gameState, rooms, currentRoom, player, isFocused]);
+    }, [gameState, rooms, currentRoom, player, isFocused, previousState, onExit]);
 
     // Handle global Escape to exit when not focused
     useEffect(() => {
@@ -467,6 +481,27 @@ export function Game({ onExit }: GameProps) {
     }, [isFocused, onExit]);
 
     // --- Render ---
+    if (gameState === 'CONFIRM_EXIT') {
+        return (
+            <div
+                className="flex flex-col items-center justify-center h-64 text-center space-y-4 animate-in fade-in outline-none relative"
+                ref={containerRef}
+                tabIndex={0}
+                onClick={() => containerRef.current?.focus()}
+            >
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-40"></div>
+                <div className="relative z-50 p-6 border border-red-500/50 rounded bg-black w-3/4 max-w-sm">
+                    <h1 className="text-xl font-bold text-red-500 mb-2">QUIT GAME?</h1>
+                    <p className="text-[10px] text-primary/60 mb-6">Unsaved progress will be lost.</p>
+                    <div className="flex gap-4 justify-center">
+                        <Button variant="outline" size="sm" className="h-8 border-red-500/50 text-red-400 hover:bg-red-950 hover:text-red-200" onClick={onExit}>[Y] Yes</Button>
+                        <Button variant="outline" size="sm" className="h-8 border-primary/50 text-primary hover:bg-primary/10" onClick={() => setGameState(previousState)}>[N] No</Button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     if (gameState === 'MENU') {
         return (
             <div
