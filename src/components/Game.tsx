@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Heart, Shield, Zap, Skull, Crown, Ghost, Coins, ChevronRight, ShoppingBag, Gem } from 'lucide-react';
+import { Heart, Shield, Zap, Skull, Crown, Ghost, Coins, ChevronRight, ShoppingBag, Gem, Droplet } from 'lucide-react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 
@@ -74,8 +74,10 @@ interface Enemy {
     hp: number;
     maxHp: number;
     attack: number;
+    defense: number;
+    dodgeChance: number;
     isElite: boolean;
-    // Enemy also needs these? Maybe later.
+    icon: React.ReactNode;
 }
 
 interface Room {
@@ -160,6 +162,33 @@ const SKILL_POOL: Skill[] = [
 ];
 
 // --- Helper Functions ---
+const BatIcon = (props: React.ComponentProps<'svg'>) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
+    >
+        <path d="M22 6c-2.7 1.3-5.2 0-7-2-1.7 1-4.3 0-6 0-1.7 1-4 2-7 2 0 4.6 2 7 5 7 1.8 0 3-1 4-2.5C12 11.5 14 13 17 13c2.7 0 5-2.2 5-7z" />
+        <path d="M9 13l3 3" />
+        <path d="M15 13l-3 3" />
+    </svg>
+);
+
+const ENEMY_TEMPLATES = [
+    { name: 'Skeleton', Icon: Skull, color: 'text-primary', hpMod: 1.0, atkMod: 1.0, def: 0, dodge: 5 },
+    { name: 'Ghost', Icon: Ghost, color: 'text-primary opacity-80', hpMod: 0.6, atkMod: 0.8, def: 0, dodge: 30 },
+    { name: 'Slime', Icon: Droplet, color: 'text-green-500', hpMod: 1.4, atkMod: 0.6, def: 2, dodge: 0 },
+    { name: 'Bat', Icon: BatIcon, color: 'text-purple-400', hpMod: 0.5, atkMod: 0.7, def: 0, dodge: 40 },
+    { name: 'Orc', Icon: Shield, color: 'text-green-700', hpMod: 1.2, atkMod: 1.2, def: 5, dodge: 0 },
+];
+
 const generateRooms = (floor: number): Room[] => {
     const numOptions = Math.floor(Math.random() * 3) + 2; // 2-4 options
     const options: Room[] = [];
@@ -178,13 +207,22 @@ const generateRooms = (floor: number): Room[] => {
 
         if (rand < 0.5) {
             type = 'ENEMY';
-            description = 'Hostile presence.';
+            const template = ENEMY_TEMPLATES[Math.floor(Math.random() * ENEMY_TEMPLATES.length)];
+            description = `A wild ${template.name} appears.`;
+            icon = <template.Icon size={16} className={template.color.split(' ')[0]} />; // Simplified color for small icon
+
+            const baseHp = 30 + (floor * 5);
+            const baseAtk = 5 + floor;
+
             enemy = {
-                name: 'Skeleton',
-                hp: Math.floor((30 + floor * 5) * difficultyMod),
-                maxHp: Math.floor((30 + floor * 5) * difficultyMod),
-                attack: Math.floor((5 + floor) * difficultyMod),
-                isElite: false
+                name: template.name,
+                hp: Math.floor(baseHp * template.hpMod * difficultyMod),
+                maxHp: Math.floor(baseHp * template.hpMod * difficultyMod),
+                attack: Math.floor(baseAtk * template.atkMod * difficultyMod),
+                defense: template.def + Math.floor(floor * 0.2),
+                dodgeChance: template.dodge,
+                isElite: false,
+                icon: <template.Icon size={64} className={template.color} />
             };
         } else if (rand < 0.6) {
             type = 'ELITE';
@@ -195,7 +233,10 @@ const generateRooms = (floor: number): Room[] => {
                 hp: Math.floor((60 + floor * 10) * difficultyMod),
                 maxHp: Math.floor((60 + floor * 10) * difficultyMod),
                 attack: Math.floor((10 + floor * 2) * difficultyMod),
-                isElite: true
+                defense: 10 + Math.floor(floor * 0.5),
+                dodgeChance: 10,
+                isElite: true,
+                icon: <Skull size={64} className="text-red-500 animate-pulse" />
             };
         } else if (rand < 0.7) {
             type = 'TREASURE';
@@ -494,34 +535,33 @@ export function Game({ onExit }: GameProps) {
 
         // Skill Effects
         if (skill.type === 'ATTACK') {
-            let dmg = Math.floor(Math.max(1, pDmg * skill.power));
+            // Check Enemy Dodge
+            if (Math.random() * 100 < (enemy.dodgeChance || 0)) {
+                addLog(`${enemy.name} dodged your attack!`);
+            } else {
+                let dmg = Math.floor(Math.max(1, pDmg * skill.power));
 
-            // Critical Hit
-            let isCrit = false;
-            if (Math.random() * 100 < player.critChance) {
-                dmg = Math.floor(dmg * 2);
-                isCrit = true;
-            }
+                // Critical Hit
+                let isCrit = false;
+                if (Math.random() * 100 < player.critChance) {
+                    dmg = Math.floor(dmg * 2);
+                    isCrit = true;
+                }
 
-            // Pierce
-            // Logic: dmg is usually max(1, atk - def). With pierce, we reduce effective def.
-            // Simplified: We apply pierce to the *final* damage calculation against enemy? 
-            // Enemy doesn't have explicit Def in interface yet, assuming they have some or we ignore for now.
-            // But wait, Enemies DON'T have defense in type definition yet. 
-            // Let's assume standard DMG = ATK for now against enemies.
-            // "Piercing" in this context could mean ignoring a future Enemy Defense stat.
-            // For now, let's just say Pierce adds flat true damage guaranteed.
-            dmg += player.pierce;
+                // Apply Enemy Defense & Pierce
+                const effectiveDef = Math.max(0, (enemy.defense || 0) - player.pierce);
+                dmg = Math.max(1, dmg - effectiveDef);
 
-            enemy.hp -= dmg;
-            addLog(`Used ${skill.name}! ${isCrit ? 'CRITICAL! ' : ''}Hit for ${dmg}.`);
+                enemy.hp -= dmg;
+                addLog(`Used ${skill.name}! ${isCrit ? 'CRITICAL! ' : ''}Hit for ${dmg}.`);
 
-            // Vampirism
-            if (player.vampirism > 0) {
-                const heal = Math.ceil(dmg * (player.vampirism / 100));
-                if (heal > 0) {
-                    setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + heal) }));
-                    addLog(`Drained ${heal} HP.`);
+                // Vampirism
+                if (player.vampirism > 0) {
+                    const heal = Math.ceil(dmg * (player.vampirism / 100));
+                    if (heal > 0) {
+                        setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + heal) }));
+                        addLog(`Drained ${heal} HP.`);
+                    }
                 }
             }
 
@@ -755,7 +795,7 @@ export function Game({ onExit }: GameProps) {
                     <div className="flex flex-col items-center animate-in zoom-in-95 duration-200">
                         <div className="mb-4 relative">
                             <div className="absolute inset-0 bg-red-500/10 blur-xl rounded-full"></div>
-                            {currentRoom.enemy.isElite ? <Skull size={64} className="text-red-500 relative z-10 animate-pulse" /> : <Ghost size={48} className="text-primary relative z-10 opacity-80" />}
+                            <div className="relative z-10 drop-shadow-lg">{currentRoom.enemy.icon}</div>
                         </div>
                         <div className="text-lg font-bold text-red-400 mb-1">{currentRoom.enemy.name}</div>
                         <Progress value={(currentRoom.enemy.hp / currentRoom.enemy.maxHp) * 100} className="h-2 w-32 bg-red-950 [&>div]:bg-red-500 mb-4" />

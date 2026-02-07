@@ -17,9 +17,7 @@ export function Terminal() {
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
     const [input, setInput] = useState('');
-    const [history, setHistory] = useState<Command[]>([
-        { command: 'help', output: t('terminal.subtitle') }
-    ]);
+    const [history, setHistory] = useState<Command[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
 
