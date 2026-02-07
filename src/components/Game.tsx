@@ -76,6 +76,8 @@ interface Enemy {
     attack: number;
     defense: number;
     dodgeChance: number;
+    critChance?: number;
+    vampirism?: number;
     isElite: boolean;
     icon: React.ReactNode;
 }
@@ -182,11 +184,11 @@ const BatIcon = (props: React.ComponentProps<'svg'>) => (
 );
 
 const ENEMY_TEMPLATES = [
-    { name: 'Skeleton', Icon: Skull, color: 'text-primary', hpMod: 1.0, atkMod: 1.0, def: 0, dodge: 5 },
-    { name: 'Ghost', Icon: Ghost, color: 'text-primary opacity-80', hpMod: 0.6, atkMod: 0.8, def: 0, dodge: 30 },
-    { name: 'Slime', Icon: Droplet, color: 'text-green-500', hpMod: 1.4, atkMod: 0.6, def: 2, dodge: 0 },
-    { name: 'Bat', Icon: BatIcon, color: 'text-purple-400', hpMod: 0.5, atkMod: 0.7, def: 0, dodge: 40 },
-    { name: 'Orc', Icon: Shield, color: 'text-green-700', hpMod: 1.2, atkMod: 1.2, def: 5, dodge: 0 },
+    { name: 'Skeleton', Icon: Skull, color: 'text-primary', hpMod: 1.0, atkMod: 1.0, def: 0, dodge: 5, crit: 5, vamp: 0 },
+    { name: 'Ghost', Icon: Ghost, color: 'text-primary opacity-80', hpMod: 0.6, atkMod: 0.8, def: 0, dodge: 30, crit: 0, vamp: 0 },
+    { name: 'Slime', Icon: Droplet, color: 'text-green-500', hpMod: 1.4, atkMod: 0.6, def: 2, dodge: 0, crit: 0, vamp: 0 },
+    { name: 'Bat', Icon: BatIcon, color: 'text-purple-400', hpMod: 0.5, atkMod: 0.7, def: 0, dodge: 40, crit: 0, vamp: 15 },
+    { name: 'Orc', Icon: Shield, color: 'text-green-700', hpMod: 1.2, atkMod: 1.2, def: 5, dodge: 0, crit: 10, vamp: 0 },
 ];
 
 const generateRooms = (floor: number): Room[] => {
@@ -221,6 +223,8 @@ const generateRooms = (floor: number): Room[] => {
                 attack: Math.floor(baseAtk * template.atkMod * difficultyMod),
                 defense: template.def + Math.floor(floor * 0.2),
                 dodgeChance: template.dodge,
+                critChance: template.crit,
+                vampirism: template.vamp,
                 isElite: false,
                 icon: <template.Icon size={64} className={template.color} />
             };
@@ -235,6 +239,8 @@ const generateRooms = (floor: number): Room[] => {
                 attack: Math.floor((10 + floor * 2) * difficultyMod),
                 defense: 10 + Math.floor(floor * 0.5),
                 dodgeChance: 10,
+                critChance: 15,
+                vampirism: 10,
                 isElite: true,
                 icon: <Skull size={64} className="text-red-500 animate-pulse" />
             };
@@ -594,16 +600,32 @@ export function Game({ onExit }: GameProps) {
                 addLog(`Dodged ${enemy.name}'s attack!`);
             } else {
                 const damage = Math.max(0, Math.floor(eDmg - pDef - skillBonusDefense));
+
+                // Enemy Crit
+                let finalDmg = damage;
+                let isEnemyCrit = false;
+                if (Math.random() * 100 < (enemy.critChance || 0)) {
+                    finalDmg = Math.floor(damage * 1.5);
+                    isEnemyCrit = true;
+                }
+
                 setPlayer(p => {
-                    const newHp = p.hp - damage;
+                    const newHp = p.hp - finalDmg;
                     if (newHp <= 0) setGameState('GAME_OVER');
                     return { ...p, hp: newHp };
                 });
-                addLog(`${enemy.name} hits for ${damage}!`);
+                addLog(`${enemy.name} ${isEnemyCrit ? 'CRITICALLY ' : ''}hits for ${finalDmg}!`);
+
+                // Enemy Vampirism
+                if ((enemy.vampirism || 0) > 0 && finalDmg > 0) {
+                    const heal = Math.ceil(finalDmg * ((enemy.vampirism || 0) / 100));
+                    enemy.hp += heal; // No max HP cap for enemies for simplicity, or add one if needed? Let's keep it simple.
+                    addLog(`${enemy.name} drains ${heal} HP!`);
+                }
 
                 // Reflect
-                if (player.reflect > 0 && damage > 0) {
-                    const reflected = Math.ceil(damage * (player.reflect / 100));
+                if (player.reflect > 0 && finalDmg > 0) {
+                    const reflected = Math.ceil(finalDmg * (player.reflect / 100));
                     enemy.hp -= reflected;
                     addLog(`Reflected ${reflected} damage!`);
                 }

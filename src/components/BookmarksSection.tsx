@@ -36,13 +36,14 @@ const VideoPreview = ({ src }: { src: string }) => {
     <video
       ref={videoRef}
       src={src}
-      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
       muted
       loop
       playsInline
     />
   );
 };
+
 
 const BookmarkModalContent = ({ item, activeCategory }: { item: any, activeCategory: string }) => {
   const [layout, setLayout] = useState<"stacked" | "side-by-side">("stacked");
@@ -248,7 +249,7 @@ const BookmarksSection = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 h-full overflow-y-auto overscroll-contain p-6 md:p-12">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto min-h-[101%]">
 
           {/* Mobile: Category Grid/List View */}
           <div className={`lg:hidden ${mobileView === 'detail' ? 'hidden' : 'block'}`}>
@@ -408,7 +409,7 @@ const BookmarksSection = () => {
                     <p>No bookmarks found matching "{searchQuery}"</p>
                   </div>
                 ) : (
-                  <div className="columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6">
+                  <div className="columns-2 md:columns-3 xl:columns-4 gap-4 space-y-4">
                     {filteredBookmarks.map((bookmark) => {
                       const title = i18n.language === 'es' ? (bookmark.title_es || bookmark.title) : bookmark.title;
                       const description = i18n.language === 'es' ? (bookmark.description_es || bookmark.description) : bookmark.description;
@@ -418,39 +419,45 @@ const BookmarksSection = () => {
                         <div
                           key={bookmark.id}
                           onClick={() => setMobileView({ type: 'detail-modal', item: bookmark })}
-                          className="group relative rounded-xl border border-border bg-card overflow-hidden hover:border-muted-foreground/50 transition-colors cursor-pointer break-inside-avoid shadow-sm hover:shadow-md"
+                          className="group relative rounded-xl overflow-hidden cursor-pointer break-inside-avoid shadow-sm hover:shadow-md transition-all duration-300"
                         >
-
-                          <div className="flex flex-col mb-1"> {/* wrapper for break avoidance assistance */}
-                            <div className="bg-muted/30 relative overflow-hidden shrink-0 border-b border-border/50">
-                              {bookmark.video ? (
-                                <VideoPreview src={bookmark.video} />
-                              ) : bookmark.image ? (
-                                <img
-                                  src={bookmark.image}
-                                  alt={title}
-                                  className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500 block"
-                                  style={{ minHeight: '120px' }} // prevent layout shift
-                                />
-                              ) : (
-                                <div className="w-full h-32 flex items-center justify-center bg-muted/10 text-muted-foreground">
-                                  <List opacity={0.2} size={24} />
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="p-4 flex flex-col gap-2">
-                              <h4 className="text-foreground font-semibold text-sm leading-tight group-hover:text-primary transition-colors">{title}</h4>
-                              {description && (
-                                <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3">{description}</p>
-                              )}
-
-                              <div className="mt-2 pt-2 border-t border-border/50 flex items-center justify-between text-[10px] text-muted-foreground opacity-60 group-hover:opacity-100 transition-opacity">
-                                <span>{bookmark.count || 0} saves</span>
-                                {bookmark.link && <ExternalLink size={12} />}
+                          {/* Background Media Layer */}
+                          <div className="relative w-full overflow-hidden bg-muted/20">
+                            {bookmark.video ? (
+                              <VideoPreview src={bookmark.video} />
+                            ) : bookmark.image ? (
+                              <img
+                                src={bookmark.image}
+                                alt={title}
+                                className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700"
+                                style={{ minHeight: '180px' }}
+                              />
+                            ) : (
+                              <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/10">
+                                <List className="opacity-20 text-foreground" size={32} />
                               </div>
+                            )}
+
+                            {/* Gradient Overlay for Readability */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent opacity-90 transition-opacity duration-300" />
+                          </div>
+
+                          {/* Content Overlay */}
+                          <div className="absolute inset-x-0 bottom-0 p-4 flex flex-col justify-end z-10 transition-all duration-300 max-h-[70%] group-hover:max-h-[85%]">
+                            <h4 className="text-white font-semibold text-sm leading-tight drop-shadow-sm line-clamp-2 mb-1 shrink-0">{title}</h4>
+
+                            {description && (
+                              <div className="grid transition-all duration-300 grid-rows-[0fr] group-hover:grid-rows-[1fr]">
+                                <p className="text-white/80 text-[10px] leading-relaxed line-clamp-4 drop-shadow-sm overflow-hidden">{description}</p>
+                              </div>
+                            )}
+
+                            <div className="flex items-center justify-between text-[10px] text-white/60 mt-2 shrink-0 border-t border-white/10 pt-2">
+                              <span>{bookmark.count || 0} saves</span>
+                              {bookmark.link && <ExternalLink size={12} className="opacity-70" />}
                             </div>
                           </div>
+
                         </div>
                       )
                     })}
