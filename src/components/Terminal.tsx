@@ -13,12 +13,12 @@ interface Command {
 }
 
 export function Terminal() {
-    useTranslation();
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
     const [input, setInput] = useState('');
     const [history, setHistory] = useState<Command[]>([
-        { command: 'help', output: 'Type "help" to see available commands.' }
+        { command: 'help', output: t('terminal.subtitle') }
     ]);
     const inputRef = useRef<HTMLInputElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -46,24 +46,24 @@ export function Terminal() {
             case 'help':
                 output = (
                     <div className="space-y-1">
-                        <p>Available commands:</p>
+                        <p>{t('terminal.help.intro')}</p>
                         <ul className="list-disc list-inside pl-2">
-                            <li><span className="text-primary font-bold">about</span> - Short bio</li>
-                            <li><span className="text-primary font-bold">skills</span> - Technical skills</li>
-                            <li><span className="text-primary font-bold">contact</span> - Contact info</li>
-                            <li><span className="text-primary font-bold">pet</span> - Summon your pet</li>
-                            <li><span className="text-primary font-bold">game</span> - Play a dungeon crawler</li>
-                            <li><span className="text-primary font-bold">clear</span> - Clear history</li>
-                            <li><span className="text-primary font-bold">exit</span> - Close terminal</li>
+                            <li><span className="text-primary font-bold">about</span> - {t('terminal.help.items.about')}</li>
+                            <li><span className="text-primary font-bold">skills</span> - {t('terminal.help.items.skills')}</li>
+                            <li><span className="text-primary font-bold">contact</span> - {t('terminal.help.items.contact')}</li>
+                            <li><span className="text-primary font-bold">pet</span> - {t('terminal.help.items.pet')}</li>
+                            <li><span className="text-primary font-bold">game</span> - {t('terminal.help.items.game')}</li>
+                            <li><span className="text-primary font-bold">clear</span> - {t('terminal.help.items.clear')}</li>
+                            <li><span className="text-primary font-bold">exit</span> - {t('terminal.help.items.exit')}</li>
                         </ul>
                     </div>
                 );
                 break;
             case 'about':
-                output = "I'm a full-stack developer passionate about building beautiful and functional web applications.";
+                output = t('terminal.about');
                 break;
             case 'skills':
-                output = "React, TypeScript, Node.js, Tailwind CSS, SQL, Python, AI/ML basics.";
+                output = t('terminal.skills');
                 break;
             case 'contact':
                 output = (
@@ -90,7 +90,7 @@ export function Terminal() {
                 output = '';
                 break;
             default:
-                output = `Command not found: ${trimmedCmd}. Type "help" for valid commands.`;
+                output = t('terminal.notFound', { cmd: trimmedCmd });
         }
 
         setHistory(prev => [...prev, { command: cmd, output }]);
@@ -137,7 +137,7 @@ export function Terminal() {
                 <div className="flex items-center justify-between px-4 py-2 bg-neutral-900 border-b border-border text-neutral-400 select-none">
                     <div className="flex items-center gap-2">
                         <TerminalIcon size={14} />
-                        <span className="text-xs font-semibold">joe@dev:~</span>
+                        <span className="text-xs font-semibold">{t('terminal.title')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <button onClick={() => setIsMinimized(!isMinimized)} className="hover:text-white transition-colors">
@@ -157,9 +157,9 @@ export function Terminal() {
                         onClick={() => !isInteractive && inputRef.current?.focus()}
                     >
                         <div className="opacity-50 mb-4 text-xs">
-                            Welcome to JoeDev Terminal v1.0.0
+                            {t('terminal.welcome')}
                             <br />
-                            Type "help" to get started so you can see what I can do.
+                            {t('terminal.subtitle')}
                         </div>
 
                         {history.map((item, index) => (

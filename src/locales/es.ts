@@ -49,5 +49,25 @@ export const es = {
             loading: "Cargando...",
             img: "IMG",
         },
+        terminal: {
+            title: "joe@dev:~",
+            welcome: "Bienvenido a la Terminal de JoeDev v1.0.0",
+            subtitle: "Escribe \"help\" para comenzar y ver qué puedo hacer.",
+            help: {
+                intro: "Comandos disponibles:",
+                items: {
+                    about: "Breve biografía",
+                    skills: "Habilidades técnicas",
+                    contact: "Información de contacto",
+                    pet: "Invocar a tu mascota",
+                    game: "Jugar un dungeon crawler",
+                    clear: "Limpiar historial",
+                    exit: "Cerrar terminal",
+                }
+            },
+            about: "Soy un desarrollador full-stack apasionado por construir aplicaciones web hermosas y funcionales.",
+            skills: "React, TypeScript, Node.js, Tailwind CSS, SQL, Python, conceptos básicos de IA/ML.",
+            notFound: "Comando no encontrado: {{cmd}}. Escribe \"help\" para ver los comandos válidos."
+        }
     },
 };
