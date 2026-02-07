@@ -129,6 +129,8 @@ const BookmarksSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: categoryImages } = useCategoryCoverImages();
 
+  // Use auto-collapse hook for internal sidebar - REMOVED
+
   const isAllBookmarks = activeCategory === "All";
 
   // Find active category ID to filter bookmarks

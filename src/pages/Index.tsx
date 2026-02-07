@@ -10,6 +10,7 @@ import BookmarksSection from "@/components/BookmarksSection";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("home");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,14 +55,18 @@ const Index = () => {
       />
       {/* Desktop Sidebar */}
       <div className="hidden md:block">
-        <Sidebar activeSection={activeSection} onNavigate={handleNavigate} />
+        <Sidebar
+          activeSection={activeSection}
+          onNavigate={handleNavigate}
+          onCollapsedChange={setIsSidebarCollapsed}
+        />
       </div>
 
       {/* Mobile Navigation */}
       <MobileNav activeSection={activeSection} onNavigate={handleNavigate} />
 
       {/* Main Content */}
-      <main className="md:ml-64 pb-24 md:pb-0">
+      <main className={`transition-all duration-300 ease-in-out pb-24 md:pb-0 ${isSidebarCollapsed ? "md:ml-20" : "md:ml-64"}`}>
         <div>
           <HeroSection />
           <WritingSection />

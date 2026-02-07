@@ -58,16 +58,33 @@ interface SidebarProps {
 import { ThemeToggle } from "./ThemeToggle";
 
 import { useProfile } from "@/hooks/use-db-data";
+import { useAutoCollapse } from "@/hooks/use-auto-collapse";
+import { useEffect } from "react";
 
-const Sidebar = ({ activeSection, onNavigate }: SidebarProps) => {
+interface SidebarProps {
+  activeSection: string;
+  onNavigate: (section: string) => void;
+  onCollapsedChange?: (collapsed: boolean) => void;
+}
+
+const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps) => {
   const { data: profile } = useProfile();
   const { t } = useTranslation();
+  const { isCollapsed, bind } = useAutoCollapse({ initialCollapsed: false, initialDelay: 1500, leaveDelay: 300 });
+
+  useEffect(() => {
+    onCollapsedChange?.(isCollapsed);
+  }, [isCollapsed, onCollapsedChange]);
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-sidebar flex flex-col py-8 z-50 border-r border-sidebar-border">
+    <aside
+      {...bind}
+      className={`fixed left-0 top-0 h-screen bg-sidebar flex flex-col py-8 z-50 border-r border-sidebar-border transition-all duration-300 ease-in-out ${isCollapsed ? "w-20" : "w-64"
+        }`}
+    >
       {/* Profile Section */}
-      <div className="px-6 mb-8 flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-muted overflow-hidden">
+      <div className={`px-6 mb-8 flex items-center transition-all duration-300 ${isCollapsed ? "gap-0" : "gap-3"}`}>
+        <div className="w-12 h-12 rounded-full bg-muted overflow-hidden shrink-0">
           {profile?.image ? (
             <img
               src={profile.image}
@@ -80,48 +97,55 @@ const Sidebar = ({ activeSection, onNavigate }: SidebarProps) => {
             </div>
           )}
         </div>
-        <div>
-          <h3 className="text-foreground font-medium text-sm">{profile?.name || t("sidebar.profile.loading")}</h3>
-          <p className="text-muted-foreground text-xs">
+        <div className={`transition-all duration-300 overflow-hidden whitespace-nowrap ${isCollapsed ? "w-0 opacity-0 ml-0" : "w-auto opacity-100 ml-3"}`}>
+          <h3 className="text-foreground font-medium text-sm whitespace-nowrap">{profile?.name || t("sidebar.profile.loading")}</h3>
+          <p className="text-muted-foreground text-xs whitespace-nowrap">
             {profile ? (i18n.language === 'es' ? (profile.role_es || profile.role) : profile.role) : "..."}
           </p>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 flex flex-col gap-1 px-4">
+      <nav className="flex-1 flex flex-col gap-1 px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
-
           return (
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 w-full text-sm ${isActive
+              className={`flex items-center rounded-lg transition-all duration-300 text-sm ${isActive
                 ? "text-primary font-medium"
                 : "text-muted-foreground hover:text-foreground"
-                }`}
+                } ${isCollapsed ? "px-4 py-2.5 gap-0" : "px-4 py-2.5 gap-0"} w-full`}
+              title={isCollapsed ? t(item.label as any) : undefined}
             >
-              <Icon size={18} className="shrink-0" />
-              <span>{t(item.label as any)}</span>
+              <Icon size={18} className="shrink-0 transition-all duration-300" />
+              <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? "opacity-0 w-0 ml-0" : "opacity-100 w-auto ml-3"}`}>
+                {t(item.label as any)}
+              </span>
             </button>
           );
         })}
 
         {/* Media Section */}
         <div className="mt-6">
-          <p className="px-4 text-xs text-muted-foreground mb-2">{t("sidebar.media")}</p>
+          <p className={`px-4 text-xs text-muted-foreground mb-2 transition-opacity duration-200 whitespace-nowrap ${isCollapsed ? "opacity-0 h-0 overflow-hidden mb-0" : "opacity-100"}`}>
+            {t("sidebar.media")}
+          </p>
           {socialLinks.map((link) => {
             const Icon = link.icon;
             return (
               <a
                 key={link.label}
                 href={link.href}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 w-full text-sm text-muted-foreground hover:text-foreground"
+                className={`flex items-center rounded-lg transition-all duration-300 text-sm text-muted-foreground hover:text-foreground ${isCollapsed ? "px-4 py-2.5 gap-0" : "px-4 py-2.5 gap-0"} w-full`}
+                title={isCollapsed ? link.label : undefined}
               >
-                <Icon className="w-[18px] h-[18px] shrink-0" />
-                <span>{link.label}</span>
+                <Icon className="w-[18px] h-[18px] shrink-0 transition-all duration-300" />
+                <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? "opacity-0 w-0 ml-0" : "opacity-100 w-auto ml-3"}`}>
+                  {link.label}
+                </span>
               </a>
             );
           })}
@@ -129,8 +153,8 @@ const Sidebar = ({ activeSection, onNavigate }: SidebarProps) => {
       </nav>
 
       {/* Theme Toggle */}
-      <div className="mt-auto px-4 pt-4">
-        <div className="flex items-center gap-3">
+      <div className={`mt-auto px-4 pt-4 transition-all duration-300 ${isCollapsed ? "flex flex-col items-center gap-4" : ""}`}>
+        <div className={`flex items-center gap-3 ${isCollapsed ? "flex-col" : ""}`}>
           <ThemeToggle />
           <LanguageSwitcher />
         </div>
