@@ -70,7 +70,7 @@ const WritingSection = () => {
           ) : (
             <div
               key={index}
-              className="grid grid-cols-12 gap-4 py-4 border-b border-border transition-colors group px-2 -mx-2"
+              className="grid grid-cols-12 gap-4 py-4 border-b border-border transition-colors group px-2 -mx-2 min-h-[53px]"
             >
               <RowContent />
             </div>

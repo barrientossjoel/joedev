@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useBookmarks, useCategories } from "@/hooks/use-db-data";
 import { useContentTranslator } from "@/hooks/use-content-translator";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -581,7 +582,15 @@ const BookmarksAdmin = () => {
                                         <div className="space-y-2">
                                             <Label>Media URL (Image or Video)</Label>
                                             <div className="flex gap-2">
-                                                <Input value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} placeholder="https://... (.jpg, .png, .mp4, .webm)" />
+                                                <Input value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} placeholder="https://... (.jpg, .png, .mp4, .webm)" className="flex-1" />
+                                            </div>
+                                            <div className="mt-2">
+                                                <ImageUploader
+                                                    onUpload={(url) => setMediaUrl(url)}
+                                                    currentValue={mediaUrl}
+                                                    cloudName="joedev-cloud"
+                                                    uploadPreset="joedev"
+                                                />
                                             </div>
                                             {mediaUrl && (
                                                 <div className="mt-2 relative h-32 w-full overflow-hidden rounded-md border bg-muted flex items-center justify-center">

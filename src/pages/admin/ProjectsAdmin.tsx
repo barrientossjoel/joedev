@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useProjects } from "@/hooks/use-db-data";
 import { useContentTranslator } from "@/hooks/use-content-translator";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -255,7 +256,15 @@ const ProjectsAdmin = () => {
                                 <div className="space-y-2">
                                     <Label>Image URL</Label>
                                     <div className="flex gap-2">
-                                        <Input value={image} onChange={e => setImage(e.target.value)} required placeholder="https://..." />
+                                        <Input value={image} onChange={e => setImage(e.target.value)} required placeholder="https://..." className="flex-1" />
+                                    </div>
+                                    <div className="mt-2">
+                                        <ImageUploader
+                                            onUpload={(url) => setImage(url)}
+                                            currentValue={image}
+                                            cloudName="joedev-cloud"
+                                            uploadPreset="joedev"
+                                        />
                                     </div>
                                     {image && (
                                         <div className="mt-2 relative h-32 w-full overflow-hidden rounded-md border">

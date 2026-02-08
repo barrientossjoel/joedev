@@ -27,11 +27,13 @@ export function ProjectsSection() {
                   <div className="absolute inset-0 z-10" />
                 </DialogTrigger>
 
-                {/* Image filling the block */}
-                <div className="absolute inset-0">
+                {/* Image filling the block with CLS protection */}
+                <div className="absolute inset-0 bg-muted/20">
                   <img
                     src={project.image}
                     alt={title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   {/* Gradient overlay for text readability - always visible */}
