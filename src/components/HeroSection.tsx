@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
 import { useQuotes, useProfile } from "@/hooks/use-db-data";
-import { Particles } from "./Particles";
+
+const Particles = lazy(() => import("./Particles"));
 
 const HeroSection = () => {
   const { t } = useTranslation();
@@ -54,7 +55,9 @@ const HeroSection = () => {
 
   return (
     <section id="home" className="min-h-screen w-full relative bg-background z-0 flex flex-col justify-center items-center py-20">
-      <Particles />
+      <Suspense fallback={null}>
+        <Particles />
+      </Suspense>
       <div className="w-full max-w-5xl mx-auto px-6 md:px-12 lg:px-20 relative z-10 animate-fade-in text-center">
         <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-10">
           {t("hero.welcome")}

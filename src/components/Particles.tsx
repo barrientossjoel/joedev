@@ -127,7 +127,7 @@ export const Particles = () => {
         const timeoutId = setTimeout(updateDimensions, 0);
 
         const isMobile = window.innerWidth < 768;
-        const particleCount = isMobile ? 60 : 130;
+        const particleCount = isMobile ? 25 : 80; // Reduced for performance (PSI optimization)
 
         const newParticles = Array.from({ length: particleCount }).map((_, i) => ({
             id: i,
@@ -186,3 +186,5 @@ export const Particles = () => {
         </div>
     );
 };
+
+export default Particles;
