@@ -17,17 +17,53 @@ export function useProjects() {
     return { data: data || [], loading, error };
 }
 
-export function useWritings() {
+type Writing = typeof schema.writings.$inferSelect;
+type OptimizedWriting = Omit<Writing, "content" | "content_es">;
+
+export function useWritings(options: { includeContent: true }): { data: Writing[], loading: boolean, error: any };
+export function useWritings(options?: { includeContent?: false }): { data: OptimizedWriting[], loading: boolean, error: any };
+export function useWritings(options: { includeContent?: boolean } = {}) {
+    const { includeContent } = options;
     const { data, isLoading: loading, error } = useQuery({
-        queryKey: ["writings"],
+        queryKey: ["writings", { includeContent }],
         queryFn: async () => {
-            return await db.select().from(writings);
+            if (includeContent) {
+                return await db.select().from(writings) as Writing[];
+            }
+            // Optimization: Exclude heavy 'content' field for the list view
+            return await db.select({
+                id: writings.id,
+                year: writings.year,
+                date: writings.date,
+                title: writings.title,
+                title_es: writings.title_es,
+                slug: writings.slug,
+                views: writings.views,
+                link: writings.link
+            }).from(writings) as OptimizedWriting[];
         },
         staleTime: Infinity,
         refetchOnWindowFocus: false,
     });
 
     return { data: data || [], loading, error };
+}
+
+export function useArticle(slug: string) {
+    const { data, isLoading: loading, error } = useQuery({
+        queryKey: ["article", slug],
+        queryFn: async () => {
+            const res = await db.select()
+                .from(writings)
+                .where(eq(writings.slug, slug))
+                .limit(1);
+            return res[0];
+        },
+        enabled: !!slug,
+        staleTime: 1000 * 60 * 60, // 1 hour
+    });
+
+    return { data, loading, error };
 }
 
 export function useBookmarks(categoryId?: number) {
@@ -102,10 +138,12 @@ export function useQuotes() {
 }
 
 export function useCategoryCoverImages() {
+    const { data: catData } = useCategories();
     const { data, isLoading: loading, error } = useQuery({
         queryKey: ["categoryCoverImages"],
         queryFn: async () => {
-            // Fetch all bookmarks that have images
+            // Optimized: We prefer the explicit coverImage from category if set
+            // Otherwise we fallback to pulling images from bookmarks
             return await db.select({
                 categoryId: bookmarks.categoryId,
                 image: bookmarks.image
@@ -114,8 +152,16 @@ export function useCategoryCoverImages() {
                 .where(isNotNull(bookmarks.image));
         },
         select: (res) => {
-            // Process to preserve the first image found for each category
             const map: Record<number, string> = {};
+
+            // First pass: Fill with existing category coverImages if they exist
+            catData.forEach(cat => {
+                if (cat.coverImage) {
+                    map[cat.id] = cat.coverImage;
+                }
+            });
+
+            // Second pass: Fill gaps with bookmark images (legacy/automatic behavior)
             res.forEach(item => {
                 if (item.categoryId && !map[item.categoryId] && item.image) {
                     map[item.categoryId] = item.image;

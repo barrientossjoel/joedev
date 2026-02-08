@@ -40,6 +40,7 @@ import { eq } from "drizzle-orm";
 const CategoryManager = ({ categories, counts }: { categories: typeof schema.categories.$inferSelect[], counts: Record<number, number> }) => {
     const [name, setName] = useState("");
     const [nameEs, setNameEs] = useState("");
+    const [coverImage, setCoverImage] = useState("");
     const [parentId, setParentId] = useState<string>("root"); // "root" or ID
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -56,15 +57,16 @@ const CategoryManager = ({ categories, counts }: { categories: typeof schema.cat
 
             if (editingId) {
                 await db.update(schema.categories)
-                    .set({ name, name_es: nameEs, parentId: newParentId })
+                    .set({ name, name_es: nameEs, coverImage, parentId: newParentId })
                     .where(eq(schema.categories.id, editingId));
                 toast.success("Category updated");
             } else {
-                await db.insert(schema.categories).values({ name, name_es: nameEs, count: 0, parentId: newParentId });
+                await db.insert(schema.categories).values({ name, name_es: nameEs, coverImage, count: 0, parentId: newParentId });
                 toast.success("Category created");
             }
             setName("");
             setNameEs("");
+            setCoverImage("");
             setParentId("root");
             setEditingId(null);
             window.location.reload();
@@ -115,6 +117,14 @@ const CategoryManager = ({ categories, counts }: { categories: typeof schema.cat
                         value={nameEs}
                         onChange={e => setNameEs(e.target.value)}
                         placeholder="Nombre de categoría..."
+                    />
+                </div>
+                <div className="space-y-1">
+                    <Label className="text-xs">Cover Image URL (Optional)</Label>
+                    <Input
+                        value={coverImage}
+                        onChange={e => setCoverImage(e.target.value)}
+                        placeholder="https://... (Optimizes initial load)"
                     />
                 </div>
                 <div className="space-y-1">
@@ -169,6 +179,7 @@ const CategoryManager = ({ categories, counts }: { categories: typeof schema.cat
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => {
                                                 setName(cat.name);
                                                 setNameEs(cat.name_es || "");
+                                                setCoverImage(cat.coverImage || "");
                                                 setParentId(cat.parentId ? cat.parentId.toString() : "root");
                                                 setEditingId(cat.id);
                                             }}>

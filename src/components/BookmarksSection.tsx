@@ -433,6 +433,7 @@ const BookmarksSection = () => {
                                 alt={title}
                                 className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700"
                                 style={{ minHeight: '180px' }}
+                                loading="lazy"
                               />
                             ) : (
                               <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/10">

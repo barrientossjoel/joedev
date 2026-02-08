@@ -31,6 +31,7 @@ export const categories = sqliteTable("categories", {
     name_es: text("name_es"),
     count: integer("count").notNull(),
     parentId: integer("parent_id"), // Self-reference for simple hierarchy
+    coverImage: text("cover_image"),
 });
 
 export const bookmarks = sqliteTable("bookmarks", {

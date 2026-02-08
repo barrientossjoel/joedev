@@ -30,7 +30,7 @@ import * as schema from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 const WritingsAdmin = () => {
-    const { data: writings, loading } = useWritings();
+    const { data: writings, loading } = useWritings({ includeContent: true });
     const [isOpen, setIsOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<typeof schema.writings.$inferSelect | null>(null);
 

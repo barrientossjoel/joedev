@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useWritings } from "@/hooks/use-db-data";
+import { useArticle } from "@/hooks/use-db-data";
 import i18n from "@/i18n";
 import { ArrowLeft, Calendar, Share2, Eye } from "lucide-react";
 import Markdown from "react-markdown";
@@ -23,7 +23,7 @@ const formatViews = (views: number) => {
 
 const Article = () => {
     const { slug } = useParams();
-    const { data: writings, loading } = useWritings();
+    const { data: article, loading } = useArticle(slug || "");
 
     if (loading) {
         return (
@@ -33,15 +33,11 @@ const Article = () => {
         );
     }
 
-    const article = writings.find((w) => w.slug === slug);
-
     // Increment view count on mount
     useEffect(() => {
         if (article) {
             const incrementView = async () => {
                 try {
-                    // Simple increment. In a real app we'd use an API to not expose DB action
-                    // But here we are using direct DB access via client config
                     const currentViews = article.views || 0;
                     await db.update(schema.writings)
                         .set({ views: currentViews + 1 })
@@ -52,7 +48,7 @@ const Article = () => {
             };
             incrementView();
         }
-    }, [slug, article?.id]); // Depend on ID to run once per article load
+    }, [slug, article?.id]);
 
     if (!article) {
         return (
