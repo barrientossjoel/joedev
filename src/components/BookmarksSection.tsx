@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import i18n from "@/i18n";
 import { useTranslation } from "react-i18next";
+import { getOptimizedUrl } from "@/utils/image-utils";
 
 const VideoPreview = ({ src }: { src: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -35,7 +36,7 @@ const VideoPreview = ({ src }: { src: string }) => {
   return (
     <video
       ref={videoRef}
-      src={src}
+      src={getOptimizedUrl(src, 'video')}
       className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
       muted
       loop
@@ -66,7 +67,7 @@ const BookmarkModalContent = ({ item, activeCategory }: { item: any, activeCateg
         {item.video ? (
           <div className="rounded-md overflow-hidden border bg-background w-full">
             <video
-              src={item.video}
+              src={getOptimizedUrl(item.video, 'video')}
               className="w-full h-auto max-h-[60vh] object-contain"
               controls
               autoPlay
@@ -78,7 +79,7 @@ const BookmarkModalContent = ({ item, activeCategory }: { item: any, activeCateg
         ) : item.image && (
           <div className="rounded-md overflow-hidden border bg-background relative group w-full">
             <img
-              src={item.image}
+              src={getOptimizedUrl(item.image)}
               alt={title}
               onLoad={handleImageLoad}
               className={`w-full h-auto object-contain ${layout === "side-by-side" ? "max-h-[70vh]" : "max-h-[50vh]"}`}
@@ -296,7 +297,7 @@ const BookmarksSection = () => {
                         <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <div className="absolute inset-0 bg-black/60 z-10" />
                           <img
-                            src={categoryImages[category.id]}
+                            src={getOptimizedUrl(categoryImages[category.id])}
                             alt=""
                             className="w-full h-full object-cover"
                           />
@@ -327,7 +328,7 @@ const BookmarksSection = () => {
                             <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                               <div className="absolute inset-0 bg-black/60 z-10" />
                               <img
-                                src={categoryImages[child.id]}
+                                src={getOptimizedUrl(categoryImages[child.id])}
                                 alt=""
                                 className="w-full h-full object-cover"
                               />
@@ -429,7 +430,7 @@ const BookmarksSection = () => {
                               <VideoPreview src={bookmark.video} />
                             ) : bookmark.image ? (
                               <img
-                                src={bookmark.image}
+                                src={getOptimizedUrl(bookmark.image)}
                                 alt={title}
                                 className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700"
                                 style={{ minHeight: '180px' }}

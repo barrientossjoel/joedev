@@ -4,6 +4,7 @@ import i18n from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ArrowUpRight, Eye } from "lucide-react";
+import { getOptimizedUrl } from "@/utils/image-utils";
 
 export function ProjectsSection() {
   const { t } = useTranslation();
@@ -30,7 +31,7 @@ export function ProjectsSection() {
                 {/* Image filling the block with CLS protection */}
                 <div className="absolute inset-0 bg-muted/20">
                   <img
-                    src={project.image}
+                    src={getOptimizedUrl(project.image)}
                     alt={title}
                     loading="lazy"
                     decoding="async"
@@ -77,7 +78,7 @@ export function ProjectsSection() {
                 <div className="space-y-6">
                   <div className="rounded-lg overflow-hidden border border-border">
                     <img
-                      src={project.image}
+                      src={getOptimizedUrl(project.image)}
                       alt={title}
                       className="w-full h-auto"
                     />
