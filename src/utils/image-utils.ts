@@ -5,7 +5,7 @@
 
 const CLOUD_NAME = "joedev-cloud";
 
-export const getOptimizedUrl = (url: string | null | undefined, type: 'image' | 'video' = 'image') => {
+export const getOptimizedUrl = (url: string | null | undefined) => {
     if (!url) return "";
 
     // If it's already a Cloudinary URL from our cloud, ensure it has optimization parameters
@@ -17,12 +17,6 @@ export const getOptimizedUrl = (url: string | null | undefined, type: 'image' | 
         return url;
     }
 
-    // If it's an external URL, use Cloudinary Fetch API to optimize it on the fly
-    // Format: https://res.cloudinary.com/<cloud_name>/<asset_type>/fetch/<transformations>/<url>
-    const assetType = type === 'video' ? 'video' : 'image';
-
-    // We encode the URL to ensure it's handled correctly as a parameter
-    const encodedUrl = encodeURIComponent(url);
-
-    return `https://res.cloudinary.com/${CLOUD_NAME}/${assetType}/fetch/f_auto,q_auto/${url}`;
+    // If it's an external URL, do not use Cloudinary Fetch API as it can cause performance issues or be blocked
+    return url;
 };

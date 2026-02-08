@@ -36,7 +36,7 @@ const VideoPreview = ({ src }: { src: string }) => {
   return (
     <video
       ref={videoRef}
-      src={getOptimizedUrl(src, 'video')}
+      src={getOptimizedUrl(src)}
       className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
       muted
       loop
@@ -67,7 +67,7 @@ const BookmarkModalContent = ({ item, activeCategory }: { item: any, activeCateg
         {item.video ? (
           <div className="rounded-md overflow-hidden border bg-background w-full">
             <video
-              src={getOptimizedUrl(item.video, 'video')}
+              src={getOptimizedUrl(item.video)}
               className="w-full h-auto max-h-[60vh] object-contain"
               controls
               autoPlay
