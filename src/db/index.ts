@@ -14,7 +14,9 @@ const getEnv = (key: string) => {
     return undefined;
 };
 
-const url = getEnv("VITE_DATABASE_URL")?.replace("libsql://", "https://");
+// For Turso Edge performance, we use the global URL which automatically routes to the nearest region.
+// The libsql client in the browser will fallback to HTTPS but using the direct URL is preferred.
+const url = getEnv("VITE_DATABASE_URL");
 const authToken = getEnv("VITE_DATABASE_AUTH_TOKEN");
 
 console.log("🔌 Connecting to DB:", url ? "Turso Cloud" : "Local Fallback");

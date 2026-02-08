@@ -7,10 +7,18 @@ import WritingSection from "@/components/WritingSection";
 import JourneySection from "@/components/JourneySection";
 import ProjectsSection from "@/components/ProjectsSection";
 import BookmarksSection from "@/components/BookmarksSection";
+import { useWritings, useProjects, useCategories, useJourney, useProfile } from "@/hooks/use-db-data";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("home");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  // Parallel Fetching Optimization: Prefetch all critical data at the top level
+  const { data: _w } = useWritings();
+  const { data: _p } = useProjects();
+  const { data: _c } = useCategories();
+  const { data: _j } = useJourney();
+  const { data: _pr } = useProfile();
 
   useEffect(() => {
     const handleScroll = () => {
