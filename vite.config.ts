@@ -26,7 +26,10 @@ export default defineConfig({
       output: {
         manualChunks: {
           "react-vendor": ["react", "react-dom", "react-router-dom"],
-          "ui-vendor": [
+          "framer-motion": ["framer-motion"],
+          "lucide": ["lucide-react"],
+          "ui-libs": ["vaul", "sonner", "clsx", "tailwind-merge"],
+          "radix-vendor": [
             "@radix-ui/react-accordion",
             "@radix-ui/react-alert-dialog",
             "@radix-ui/react-aspect-ratio",
@@ -54,10 +57,6 @@ export default defineConfig({
             "@radix-ui/react-toggle",
             "@radix-ui/react-toggle-group",
             "@radix-ui/react-tooltip",
-            "framer-motion",
-            "lucide-react",
-            "vaul",
-            "sonner"
           ],
           "tanstack": ["@tanstack/react-query"],
         },
