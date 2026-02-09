@@ -52,10 +52,10 @@ const App = () => {
         <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
           <TooltipProvider>
             <Background />
-            <Terminal />
-            <Toaster />
-            <Sonner />
             <BrowserRouter>
+              <Terminal />
+              <Toaster />
+              <Sonner />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<Index />} />
