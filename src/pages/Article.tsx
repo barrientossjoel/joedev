@@ -6,7 +6,7 @@ import Markdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -33,9 +33,12 @@ const Article = () => {
         );
     }
 
-    // Increment view count on mount
+    // Increment view count on mount (once per session)
+    const hasIncremented = useRef(false);
+
     useEffect(() => {
-        if (article) {
+        if (article && !hasIncremented.current) {
+            hasIncremented.current = true;
             const incrementView = async () => {
                 try {
                     const currentViews = article.views || 0;
@@ -48,7 +51,7 @@ const Article = () => {
             };
             incrementView();
         }
-    }, [slug, article?.id]);
+    }, [article?.id]);
 
     if (!article) {
         return (
@@ -98,19 +101,13 @@ const Article = () => {
                                 <Calendar size={14} />
                                 <span>{article.date}, {article.year}</span>
                             </div>
-                            {/* 
-                <div className="flex items-center gap-1.5">
-                    <User size={14} />
-                    <span>Joel Barrientos</span>
-                </div>
-                 */}
                             <div className="flex items-center gap-1.5">
                                 <Eye size={14} />
                                 <span>{formatViews(article.views || 0)} views</span>
                             </div>
                         </div>
 
-                        <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-tight mb-6">
+                        <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-tight mb-6 font-heading">
                             {title}
                         </h1>
 
