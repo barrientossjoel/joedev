@@ -85,9 +85,9 @@ const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps)
       {/* Profile Section */}
       <div
         onMouseEnter={expand}
-        className={`px-6 mb-8 flex items-center transition-all duration-300 cursor-pointer ${isCollapsed ? "gap-0" : "gap-3"}`}
+        className={`mb-8 flex items-center transition-all duration-300 cursor-pointer ${isCollapsed ? "px-4" : "px-6"}`}
       >
-        <div className="w-12 h-12 rounded-full bg-muted overflow-hidden shrink-0">
+        <div className="w-12 h-12 rounded-full bg-muted overflow-hidden shrink-0 flex items-center justify-center">
           {profile?.image ? (
             <img
               src={profile.image}
@@ -100,7 +100,7 @@ const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps)
             </div>
           )}
         </div>
-        <div className={`transition-all duration-300 overflow-hidden whitespace-nowrap ${isCollapsed ? "w-0 opacity-0 ml-0" : "w-auto opacity-100 ml-3"}`}>
+        <div className={`transition-all duration-500 ease-in-out overflow-hidden whitespace-nowrap ml-4 ${isCollapsed ? "max-w-0 opacity-0" : "max-w-[200px] opacity-100"}`}>
           <h3 className="text-foreground font-medium text-sm whitespace-nowrap">{profile?.name || t("sidebar.profile.loading")}</h3>
           <p className="text-muted-foreground text-xs whitespace-nowrap">
             {profile ? (i18n.language === 'es' ? (profile.role_es || profile.role) : profile.role) : "..."}
@@ -109,7 +109,7 @@ const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps)
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 flex flex-col gap-1 px-2">
+      <nav className="flex-1 flex flex-col gap-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
@@ -118,14 +118,16 @@ const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps)
               key={item.id}
               onClick={() => onNavigate(item.id)}
               onMouseEnter={expand}
-              className={`flex items-center rounded-lg transition-all duration-300 text-sm ${isActive
+              className={`flex items-center rounded-lg transition-all duration-300 text-sm py-2.5 w-full ${isActive
                 ? "text-primary font-medium"
                 : "text-muted-foreground hover:text-foreground"
-                } ${isCollapsed ? "px-4 py-2.5 gap-0" : "px-4 py-2.5 gap-0"} w-full`}
+                } ${isCollapsed ? "px-4" : "px-6"}`}
               title={isCollapsed ? t(item.label as any) : undefined}
             >
-              <Icon size={18} className="shrink-0 transition-all duration-300" />
-              <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? "opacity-0 w-0 ml-0" : "opacity-100 w-auto ml-3"}`}>
+              <div className="w-12 shrink-0 flex items-center justify-center">
+                <Icon size={18} className="transition-all duration-300" />
+              </div>
+              <span className={`transition-all duration-500 ease-in-out whitespace-nowrap overflow-hidden ml-4 ${isCollapsed ? "max-w-0 opacity-0" : "max-w-[200px] opacity-100"}`}>
                 {t(item.label as any)}
               </span>
             </button>
@@ -133,8 +135,8 @@ const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps)
         })}
 
         {/* Media Section */}
-        <div className="mt-6">
-          <p className={`px-4 text-xs text-muted-foreground mb-2 transition-opacity duration-200 whitespace-nowrap ${isCollapsed ? "opacity-0 h-0 overflow-hidden mb-0" : "opacity-100"}`}>
+        <div className="mt-6 flex flex-col gap-1">
+          <p className={`text-xs text-muted-foreground mb-1 transition-all duration-500 ease-in-out whitespace-nowrap overflow-hidden ${isCollapsed ? "max-w-0 opacity-0 pl-0" : "max-w-[200px] opacity-100 pl-[39px]"}`}>
             {t("sidebar.media")}
           </p>
           {socialLinks.map((link) => {
@@ -144,11 +146,13 @@ const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps)
                 key={link.label}
                 href={link.href}
                 onMouseEnter={expand}
-                className={`flex items-center rounded-lg transition-all duration-300 text-sm text-muted-foreground hover:text-foreground ${isCollapsed ? "px-4 py-2.5 gap-0" : "px-4 py-2.5 gap-0"} w-full`}
+                className={`flex items-center rounded-lg transition-all duration-300 text-sm text-muted-foreground hover:text-foreground py-2.5 w-full ${isCollapsed ? "px-4" : "px-6"}`}
                 title={isCollapsed ? link.label : undefined}
               >
-                <Icon className="w-[18px] h-[18px] shrink-0 transition-all duration-300" />
-                <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? "opacity-0 w-0 ml-0" : "opacity-100 w-auto ml-3"}`}>
+                <div className="w-12 shrink-0 flex items-center justify-center">
+                  <Icon className="w-[18px] h-[18px] transition-all duration-300" />
+                </div>
+                <span className={`transition-all duration-500 ease-in-out whitespace-nowrap overflow-hidden ml-4 ${isCollapsed ? "max-w-0 opacity-0" : "max-w-[200px] opacity-100"}`}>
                   {link.label}
                 </span>
               </a>
@@ -159,7 +163,6 @@ const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps)
 
       {/* Theme Toggle */}
       <div
-        onMouseEnter={expand}
         className={`mt-auto px-4 pt-4 transition-all duration-300 ${isCollapsed ? "flex flex-col items-center gap-4" : ""}`}
       >
         <div className={`flex items-center gap-3 ${isCollapsed ? "flex-col" : ""}`}>
