@@ -16,7 +16,7 @@ const WritingSection = () => {
 
   return (
     <section id="writing" className="min-h-screen flex flex-col justify-center py-20 px-6 md:px-12 lg:px-20 max-w-5xl mx-auto w-full">
-      <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-12">
+      <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-12 font-heading tracking-tight">
         Writing
       </h2>
 
@@ -39,7 +39,7 @@ const WritingSection = () => {
           <>
             <div className="col-span-2 text-muted-foreground text-sm group-hover:text-primary transition-colors">{item.year}</div>
             <div className="col-span-2 text-muted-foreground text-sm group-hover:text-primary transition-colors">{item.date}</div>
-            <div className="col-span-6 text-sm text-muted-foreground group-hover:text-primary transition-colors font-medium">
+            <div className="col-span-6 text-sm text-muted-foreground group-hover:text-primary transition-colors font-medium font-heading tracking-tight">
               {title}
             </div>
             <div className="col-span-2 text-muted-foreground text-sm text-right group-hover:text-primary transition-colors">{formatViews(item.views || 0)}</div>

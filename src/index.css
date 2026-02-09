@@ -1,9 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Azeret+Mono:ital,wght@0,100..900;1,100..900&display=swap');
 @import "@fontsource-variable/inter";
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
 @theme {
   --font-sans: 'Inter Variable', 'sans-serif';
+  --font-heading: 'Azeret Mono', 'monospace';
 
   --color-border: var(--border);
   --color-input: var(--input);

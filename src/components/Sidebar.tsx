@@ -70,7 +70,7 @@ interface SidebarProps {
 const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps) => {
   const { data: profile } = useProfile();
   const { t } = useTranslation();
-  const { isCollapsed, bind } = useAutoCollapse({ initialCollapsed: false, initialDelay: 1500, leaveDelay: 300 });
+  const { isCollapsed, expand, collapse } = useAutoCollapse({ initialCollapsed: false, initialDelay: 1500, leaveDelay: 300 });
 
   useEffect(() => {
     onCollapsedChange?.(isCollapsed);
@@ -78,12 +78,15 @@ const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps)
 
   return (
     <aside
-      {...bind}
+      onMouseLeave={collapse}
       className={`fixed left-0 top-0 h-screen bg-sidebar flex flex-col py-8 z-50 border-r border-sidebar-border transition-all duration-300 ease-in-out ${isCollapsed ? "w-20" : "w-64"
         }`}
     >
       {/* Profile Section */}
-      <div className={`px-6 mb-8 flex items-center transition-all duration-300 ${isCollapsed ? "gap-0" : "gap-3"}`}>
+      <div
+        onMouseEnter={expand}
+        className={`px-6 mb-8 flex items-center transition-all duration-300 cursor-pointer ${isCollapsed ? "gap-0" : "gap-3"}`}
+      >
         <div className="w-12 h-12 rounded-full bg-muted overflow-hidden shrink-0">
           {profile?.image ? (
             <img
@@ -114,6 +117,7 @@ const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps)
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
+              onMouseEnter={expand}
               className={`flex items-center rounded-lg transition-all duration-300 text-sm ${isActive
                 ? "text-primary font-medium"
                 : "text-muted-foreground hover:text-foreground"
@@ -139,6 +143,7 @@ const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps)
               <a
                 key={link.label}
                 href={link.href}
+                onMouseEnter={expand}
                 className={`flex items-center rounded-lg transition-all duration-300 text-sm text-muted-foreground hover:text-foreground ${isCollapsed ? "px-4 py-2.5 gap-0" : "px-4 py-2.5 gap-0"} w-full`}
                 title={isCollapsed ? link.label : undefined}
               >
@@ -153,7 +158,10 @@ const Sidebar = ({ activeSection, onNavigate, onCollapsedChange }: SidebarProps)
       </nav>
 
       {/* Theme Toggle */}
-      <div className={`mt-auto px-4 pt-4 transition-all duration-300 ${isCollapsed ? "flex flex-col items-center gap-4" : ""}`}>
+      <div
+        onMouseEnter={expand}
+        className={`mt-auto px-4 pt-4 transition-all duration-300 ${isCollapsed ? "flex flex-col items-center gap-4" : ""}`}
+      >
         <div className={`flex items-center gap-3 ${isCollapsed ? "flex-col" : ""}`}>
           <ThemeToggle />
           <LanguageSwitcher />

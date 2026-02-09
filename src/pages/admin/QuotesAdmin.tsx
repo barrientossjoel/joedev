@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuotes } from "@/hooks/use-db-data";
 import { Button } from "@/components/ui/button";
@@ -26,12 +25,14 @@ import { toast } from "sonner";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 
 const QuotesAdmin = () => {
+    const queryClient = useQueryClient();
     const { data: quotes, loading } = useQuotes();
     const [isOpen, setIsOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<typeof schema.quotes.$inferSelect | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
 
     // Form state
     const [text, setText] = useState("");
@@ -52,6 +53,40 @@ const QuotesAdmin = () => {
         if (!open) resetForm();
     };
 
+    const mutation = useMutation({
+        mutationFn: async (values: any) => {
+            if (editingItem) {
+                return await db.update(schema.quotes)
+                    .set(values)
+                    .where(eq(schema.quotes.id, editingItem.id));
+            } else {
+                return await db.insert(schema.quotes).values(values);
+            }
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["quotes"] });
+            toast.success(editingItem ? "Quote updated" : "Quote created");
+            setIsOpen(false);
+            resetForm();
+        },
+        onError: () => {
+            toast.error("Failed to save quote");
+        }
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: async (id: number) => {
+            return await db.delete(schema.quotes).where(eq(schema.quotes.id, id));
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["quotes"] });
+            toast.success("Quote deleted");
+        },
+        onError: () => {
+            toast.error("Failed to delete quote");
+        }
+    });
+
     const handleEdit = (item: typeof schema.quotes.$inferSelect) => {
         setEditingItem(item);
         setText(item.text);
@@ -63,45 +98,24 @@ const QuotesAdmin = () => {
 
     const handleDelete = async (id: number) => {
         if (!confirm("Are you sure you want to delete this quote?")) return;
-        try {
-            await db.delete(schema.quotes).where(eq(schema.quotes.id, id));
-            toast.success("Quote deleted");
-            window.location.reload();
-        } catch (e) {
-            toast.error("Failed to delete quote");
-        }
+        deleteMutation.mutate(id);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
-        try {
-            const values = {
-                text,
-                text_es: textEs,
-                author,
-                background
-            };
-
-            if (editingItem) {
-                await db.update(schema.quotes)
-                    .set(values)
-                    .where(eq(schema.quotes.id, editingItem.id));
-                toast.success("Quote updated");
-            } else {
-                await db.insert(schema.quotes).values(values);
-                toast.success("Quote created");
-            }
-            setIsOpen(false);
-            window.location.reload();
-        } catch (e) {
-            toast.error("Failed to save quote");
-        } finally {
-            setIsLoading(false);
-        }
+        mutation.mutate({
+            text,
+            text_es: textEs,
+            author,
+            background
+        });
     };
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return (
+        <div className="flex items-center justify-center p-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    );
 
     return (
         <div className="space-y-6">
@@ -148,22 +162,33 @@ const QuotesAdmin = () => {
                                     placeholder="Steve Jobs"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label>Background (CSS or Image URL)</Label>
-                                <Input
-                                    value={background}
-                                    onChange={e => setBackground(e.target.value)}
-                                    placeholder="https://... or linear-gradient(...)"
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    Can be a URL or a CSS value like 'linear-gradient(...)'.
-                                </p>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label>Background Style (Image or Color)</Label>
+                                    <div className="flex flex-col gap-3">
+                                        <Input
+                                            value={background}
+                                            onChange={e => setBackground(e.target.value)}
+                                            placeholder="https://... or linear-gradient(...)"
+                                            className="font-mono text-xs"
+                                        />
+                                        <ImageUploader
+                                            onUpload={setBackground}
+                                            currentValue={background}
+                                            cloudName="joedev-cloud"
+                                            uploadPreset="joedev"
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                        <b>Tip:</b> Use a URL for an image, or a CSS value like <code>linear-gradient(45deg, #000, #333)</code> for colors.
+                                    </p>
+                                </div>
                             </div>
 
                             <DialogFooter>
-                                <Button type="submit" disabled={isLoading}>
-                                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Save
+                                <Button type="submit" disabled={mutation.isPending}>
+                                    {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Save Quote
                                 </Button>
                             </DialogFooter>
                         </form>

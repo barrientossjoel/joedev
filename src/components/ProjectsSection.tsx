@@ -14,7 +14,7 @@ export function ProjectsSection() {
 
   return (
     <section id="projects" className="h-screen w-full pt-16 pb-0 bg-background flex flex-col">
-      <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-4 text-center px-6 shrink-0">
+      <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-4 text-center px-6 shrink-0 font-heading tracking-tight">
         {t("projects.title")}
       </h2>
       <div className="grid grid-cols-2 gap-0 w-full flex-1 min-h-0">

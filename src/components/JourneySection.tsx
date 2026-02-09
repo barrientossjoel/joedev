@@ -41,7 +41,7 @@ const JourneySection = () => {
 
   return (
     <section id="journey" className="min-h-screen flex flex-col justify-center py-20 px-6 md:px-12 lg:px-20 max-w-5xl mx-auto w-full">
-      <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-12">
+      <h2 className="text-3xl md:text-4xl font-semibold text-foreground mb-12 font-heading tracking-tight">
         {t("journey.title")}
       </h2>
 
@@ -73,7 +73,7 @@ const JourneySection = () => {
 
                   {/* Content */}
                   <div className="flex-1 pb-12 pt-0.5">
-                    <h3 className="text-foreground font-medium mb-1 leading-snug">{event.title}</h3>
+                    <h3 className="text-foreground font-medium mb-1 leading-snug font-heading tracking-tight">{event.title}</h3>
                     <p className="text-muted-foreground text-sm leading-relaxed">{event.description}</p>
                   </div>
                 </div>

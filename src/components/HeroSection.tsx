@@ -59,7 +59,7 @@ const HeroSection = () => {
         <Particles />
       </Suspense>
       <div className="w-full max-w-5xl mx-auto px-6 md:px-12 lg:px-20 relative z-10 animate-fade-in text-center">
-        <h1 className="text-3xl md:text-4xl font-semibold text-foreground mb-10">
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-10 font-heading tracking-tight">
           {t("hero.welcome")}
         </h1>
 

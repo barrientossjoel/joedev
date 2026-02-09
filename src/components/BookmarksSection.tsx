@@ -110,7 +110,7 @@ const BookmarkModalContent = ({ item, activeCategory }: { item: any, activeCateg
 
         {item.link && (
           <div className="pt-4 mt-auto">
-            <Button asChild className="w-full h-12 text-base shadow-sm hover:shadow-md transition-all">
+            <Button asChild variant="outline" className="w-full h-12 text-base border-primary text-primary hover:bg-primary hover:text-primary-foreground shadow-sm hover:shadow-md transition-all">
               <a href={item.link} target="_blank" rel="noopener noreferrer">
                 Visit Resource <ExternalLink className="ml-2 size-5" />
               </a>
@@ -257,7 +257,7 @@ const BookmarksSection = () => {
           {/* Mobile: Category Grid/List View */}
           <div className={`lg:hidden ${mobileView === 'detail' ? 'hidden' : 'block'}`}>
             <div className="flex items-center justify-between mb-4 pl-14 -mt-2 md:pl-0 md:mt-0 pr-2">
-              <h2 className="text-2xl font-semibold text-foreground">Collections</h2>
+              <h2 className="text-2xl font-semibold text-foreground font-heading tracking-tight">Collections</h2>
             </div>
 
             {/* Mobile All Bookmarks Button - Compact */}
@@ -305,7 +305,7 @@ const BookmarksSection = () => {
                       )}
 
                       <div className="relative z-10">
-                        <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">
+                        <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors font-heading tracking-tight">
                           {catName}
                         </h3>
                         <span className="text-sm text-muted-foreground">{category.count} bookmarks</span>
@@ -339,7 +339,7 @@ const BookmarksSection = () => {
                             in {catName}
                           </div>
                           <div className="relative z-10">
-                            <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">
+                            <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors font-heading tracking-tight">
                               {childName}
                             </h3>
                             <span className="text-sm text-muted-foreground">{child.count} bookmarks</span>
@@ -365,7 +365,7 @@ const BookmarksSection = () => {
                 >
                   <ChevronLeft size={24} className="text-foreground" />
                 </button>
-                <h3 className="text-xl font-semibold text-foreground truncate">
+                <h3 className="text-xl font-semibold text-foreground truncate font-heading tracking-tight">
                   {activeCategory === "All" ? "All Bookmarks" : activeCategory}
                 </h3>
               </div>
@@ -384,7 +384,7 @@ const BookmarksSection = () => {
 
             {/* Desktop Header with Integrated Search (No Toggle) */}
             <div className="hidden lg:flex items-center justify-between mb-8 gap-6">
-              <h3 className="text-3xl font-semibold text-foreground shrink-0">
+              <h3 className="text-3xl font-semibold text-foreground shrink-0 font-heading tracking-tight">
                 {activeCategory === "All" ? "All Bookmarks" : activeCategory}
               </h3>
 
@@ -416,7 +416,6 @@ const BookmarksSection = () => {
                     {filteredBookmarks.map((bookmark) => {
                       const title = i18n.language === 'es' ? (bookmark.title_es || bookmark.title) : bookmark.title;
                       const description = i18n.language === 'es' ? (bookmark.description_es || bookmark.description) : bookmark.description;
-
                       // Always Grid View Item (Masonry)
                       return (
                         <div

@@ -27,11 +27,15 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <div className="min-h-screen flex bg-background">
             {/* Sidebar */}
-            <aside className="w-64 border-r bg-muted/20 flex flex-col">
-                <div className="p-6 border-b">
-                    <h2 className="font-bold text-lg">Admin Panel</h2>
+            <aside className="w-20 border-r border-sidebar-border bg-sidebar flex flex-col items-center py-8 z-50">
+                <div className="mb-8 px-4 w-full flex justify-center">
+                    <div className="w-12 h-12 rounded-full bg-muted overflow-hidden shrink-0 border border-sidebar-border">
+                        <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                            A
+                        </div>
+                    </div>
                 </div>
-                <nav className="flex-1 p-4 space-y-2">
+                <nav className="flex-1 w-full px-2 space-y-1">
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = location.pathname === item.href;
@@ -39,25 +43,27 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                             <Link
                                 key={item.href}
                                 to={item.href}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive
-                                    ? "bg-primary text-primary-foreground"
-                                    : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                                className={`flex items-center justify-center w-full py-2.5 rounded-lg transition-all duration-300 ${isActive
+                                    ? "text-primary font-medium"
+                                    : "text-muted-foreground hover:text-foreground"
                                     }`}
+                                title={item.label}
                             >
                                 <Icon size={18} />
-                                {item.label}
                             </Link>
                         );
                     })}
                 </nav>
-                <div className="p-4 border-t space-y-4">
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Theme</span>
-                        <ThemeToggle />
-                    </div>
-                    <Button variant="outline" className="w-full justify-start gap-2" onClick={handleLogout}>
+                <div className="w-full mt-auto px-4 pt-4 flex flex-col items-center gap-4">
+                    <ThemeToggle />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                        onClick={handleLogout}
+                        title="Logout"
+                    >
                         <LogOut size={18} />
-                        Logout
                     </Button>
                 </div>
             </aside>

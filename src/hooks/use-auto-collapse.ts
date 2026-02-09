@@ -10,7 +10,7 @@ export function useAutoCollapse({ initialCollapsed = true, initialDelay = 1500, 
     const [isCollapsed, setIsCollapsed] = useState(initialCollapsed);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const onMouseEnter = useCallback(() => {
+    const expand = useCallback(() => {
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
@@ -18,7 +18,7 @@ export function useAutoCollapse({ initialCollapsed = true, initialDelay = 1500, 
         setIsCollapsed(false);
     }, []);
 
-    const onMouseLeave = useCallback(() => {
+    const collapse = useCallback(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
             setIsCollapsed(true);
@@ -35,13 +35,15 @@ export function useAutoCollapse({ initialCollapsed = true, initialDelay = 1500, 
         return () => {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
-    }, []);
+    }, [initialCollapsed, initialDelay]);
 
     return {
         isCollapsed,
+        expand,
+        collapse,
         bind: {
-            onMouseEnter,
-            onMouseLeave
+            onMouseEnter: expand,
+            onMouseLeave: collapse
         }
     };
 }
