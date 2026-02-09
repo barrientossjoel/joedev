@@ -30,8 +30,8 @@ const WritingSection = () => {
 
       {/* Table Rows */}
       {writings.map((item, index) => {
-        const isInternal = !!item.slug;
-        const href = isInternal ? `/writing/${item.slug}` : item.link;
+        const isInternal = !item.link && !!item.slug;
+        const href = item.link || (item.slug ? `/writing/${item.slug}` : undefined);
         const title = i18n.language === 'es' ? (item.title_es || item.title) : item.title;
 
         // Wrapper for the row content to make it clickable
