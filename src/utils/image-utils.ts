@@ -24,6 +24,11 @@ export const getOptimizedUrl = (url: string | null | undefined) => {
         if (url.includes('google-analytics.com')) return url;
         if (url.endsWith('.svg')) return url;
 
+        // Don't attempt to optimize videos with image/fetch
+        if (/\.(mp4|webm|mov|mkv|avi)(\?|$|#)/i.test(url)) {
+            return url;
+        }
+
         // Use Cloudinary fetch to resize and optimize
         // f_auto: auto format (webp/avif)
         // q_auto: auto quality
