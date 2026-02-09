@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { projects, writings, bookmarks, categories } from "@/db/schema";
@@ -174,4 +175,18 @@ export function useCategoryCoverImages() {
     });
 
     return { data: data || {}, loading, error };
+}
+
+export function useIncrementView() {
+    return useCallback(async (id: number, currentViews: number) => {
+        try {
+            await db.update(writings)
+                .set({ views: currentViews + 1 })
+                .where(eq(writings.id, id));
+            return true;
+        } catch (e) {
+            console.error("Failed to increment views:", e);
+            return false;
+        }
+    }, []);
 }

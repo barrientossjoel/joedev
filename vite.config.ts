@@ -11,6 +11,16 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    watch: {
+      ignored: [
+        path.resolve(__dirname, 'local.db'),
+        path.resolve(__dirname, 'local.db-journal'),
+        path.resolve(__dirname, 'local.db-shm'),
+        path.resolve(__dirname, 'local.db-wal'),
+      ],
+    },
+  },
   build: {
     rollupOptions: {
       output: {

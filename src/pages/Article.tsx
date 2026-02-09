@@ -1,11 +1,12 @@
 import { useParams, Link } from "react-router-dom";
-import { useArticle } from "@/hooks/use-db-data";
+import { useArticle, useIncrementView } from "@/hooks/use-db-data";
 import i18n from "@/i18n";
 import { ArrowLeft, Calendar, Share2, Eye } from "lucide-react";
 import Markdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
+import { useEffect, useRef } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
@@ -19,6 +20,21 @@ const formatViews = (views: number) => {
 const Article = () => {
     const { slug } = useParams();
     const { data: article, loading } = useArticle(slug || "");
+    const incrementView = useIncrementView();
+    const hasIncremented = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (article && hasIncremented.current !== article.slug) {
+            hasIncremented.current = article.slug;
+
+            // Safe increment with delay
+            const timer = setTimeout(() => {
+                incrementView(article.id, article.views || 0);
+            }, 2000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [article?.id, article?.slug, incrementView]);
 
     if (loading) {
         return (
