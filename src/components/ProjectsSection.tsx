@@ -37,11 +37,11 @@ export function ProjectsSection() {
                     decoding="async"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  {/* Gradient overlay for text readability - always visible */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                  {/* Uniform overlay for readability and premium look */}
+                  <div className="absolute inset-0 bg-black/50 group-hover:bg-black/60 transition-colors duration-500" />
 
-                  {/* Hover overlay for 'View Details' - darker */}
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                  {/* Hover overlay for 'View Details' */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none z-30">
                     <span className="text-white font-medium flex items-center gap-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                       <Eye size={20} /> {t("projects.viewDetails")}
                     </span>
@@ -53,20 +53,24 @@ export function ProjectsSection() {
                       href={project.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute top-4 right-4 z-30 p-2 bg-black/50 hover:bg-white/20 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm pointer-events-auto"
+                      className="absolute top-4 right-4 z-40 p-2 bg-black/50 hover:bg-white/20 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm pointer-events-auto"
                       onClick={(e) => e.stopPropagation()}
-                      title={t("projects.visitProject") as any} // Cast if needed or string
+                      title={t("projects.visitProject") as any}
                     >
                       <ArrowUpRight size={20} />
                     </a>
                   )}
                 </div>
 
-                {/* Text Content - Always Visible over image */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 z-20 pointer-events-none">
-                  <span className="text-xs font-mono text-gray-300 mb-2 block">{project.number}</span>
-                  <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-primary transition-colors">{title}</h3>
-                  <p className="text-gray-300 line-clamp-2 text-sm max-w-[90%]">{description}</p>
+                {/* Text Content - Positioned at the very bottom to avoid hover overlap in center */}
+                <div className="absolute inset-x-0 bottom-0 p-8 md:p-14 z-20 pointer-events-none flex flex-col justify-end pb-6 md:pb-10">
+                  <span className="text-xs font-mono text-gray-400 mb-2 block">{project.number}</span>
+                  <h3 className="text-xl font-semibold mb-3 text-white group-hover:text-primary transition-colors">
+                    {title}
+                  </h3>
+                  <p className="text-gray-400 line-clamp-3 text-sm max-w-[85%] leading-relaxed">
+                    {description}
+                  </p>
                 </div>
               </div>
 
