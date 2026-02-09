@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useBookmarks, useCategories } from "@/hooks/use-db-data";
 import { useContentTranslator } from "@/hooks/use-content-translator";
 import { ImageUploader } from "@/components/admin/ImageUploader";
+import { uploadToCloudinary } from "@/utils/cloudinary-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -333,14 +334,24 @@ const BookmarksAdmin = () => {
 
         // Optimistic UI: Close immediately
         setIsOpen(false);
-        const toastId = toast.loading("Saving bookmark in background...");
+        const toastId = toast.loading("Processing media & saving...");
 
         // Background Process
         (async () => {
             try {
-                const newCategoryId = categoryId ? parseInt(categoryId) : null;
+                // 1. Process Media (Auto-Upload)
+                let finalMediaUrl = mediaUrl;
+                if (mediaUrl && mediaUrl.startsWith("http") && !mediaUrl.includes("res.cloudinary.com")) {
+                    try {
+                        finalMediaUrl = await uploadToCloudinary(mediaUrl);
+                    } catch (uploadError) {
+                        console.error("Auto-upload failed, using original URL", uploadError);
+                        toast.warning("Could not optimize media, using original link.");
+                    }
+                }
 
-                const isVid = isVideo(mediaUrl);
+                const newCategoryId = categoryId ? parseInt(categoryId) : null;
+                const isVid = isVideo(finalMediaUrl);
 
                 // Auto-translate if needed
                 let finalTitleEs = titleEs;
@@ -373,8 +384,8 @@ const BookmarksAdmin = () => {
                     description: finalDescription,
                     description_es: finalDescriptionEs,
                     link,
-                    image: isVid ? null : mediaUrl,
-                    video: isVid ? mediaUrl : null,
+                    image: isVid ? null : finalMediaUrl,
+                    video: isVid ? finalMediaUrl : null,
                     count,
                     categoryId: newCategoryId
                 };
@@ -426,7 +437,7 @@ const BookmarksAdmin = () => {
                 ]);
 
                 toast.dismiss(toastId);
-                toast.success("Bookmark saved successfully!");
+                toast.success("Bookmark saved & optimized successfully!");
 
             } catch (e) {
                 console.error(e);
