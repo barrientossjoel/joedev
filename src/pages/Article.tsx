@@ -6,11 +6,6 @@ import Markdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
-import { useEffect, useRef } from "react";
-import { db } from "@/db";
-import * as schema from "@/db/schema";
-import { eq } from "drizzle-orm";
-
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
@@ -32,26 +27,6 @@ const Article = () => {
             </div>
         );
     }
-
-    // Increment view count on mount (once per session)
-    const hasIncremented = useRef(false);
-
-    useEffect(() => {
-        if (article && !hasIncremented.current) {
-            hasIncremented.current = true;
-            const incrementView = async () => {
-                try {
-                    const currentViews = article.views || 0;
-                    await db.update(schema.writings)
-                        .set({ views: currentViews + 1 })
-                        .where(eq(schema.writings.id, article.id));
-                } catch (e) {
-                    console.error("Failed to increment views", e);
-                }
-            };
-            incrementView();
-        }
-    }, [article?.id]);
 
     if (!article) {
         return (
