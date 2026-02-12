@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Azeret+Mono:ital,wght@0,100..900;1,100..900&display=swap');
 @import "@fontsource-variable/inter";
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
@@ -157,7 +159,7 @@
     --chart-3: oklch(0.67 0.16 58);
     --chart-4: oklch(0.56 0.15 49);
     --chart-5: oklch(0.47 0.12 46);
-    --radius: 0rem;
+    --radius: 0.5rem;
     --sidebar-background: oklch(0.985 0 0); /* Slightly off-white to distinguish from main content */
     --sidebar-foreground: oklch(0.141 0.005 285.823);
     --sidebar-primary: oklch(0.67 0.16 58);
@@ -212,9 +214,96 @@
     --nav-item: oklch(0.705 0.015 286.067);
     --nav-item-active: oklch(0.985 0 0);
   }
+
+  /* Retro Theme - Retrofuturistic Cyberpunk */
+  .theme-retro {
+    --background: oklch(0.12 0.03 145); /* Dark almost-black green */
+    --foreground: oklch(0.81 0.11 152); /* #a9d4ac - Minty Green */
+    --card: oklch(0.15 0.04 145);
+    --card-foreground: oklch(0.81 0.11 152);
+    --popover: oklch(0.15 0.04 145);
+    --popover-foreground: oklch(0.81 0.11 152);
+    --primary: oklch(0.81 0.11 152); /* #a9d4ac */
+    --primary-foreground: oklch(0.12 0.03 145);
+    --secondary: oklch(0.20 0.05 145);
+    --secondary-foreground: oklch(0.81 0.11 152);
+    --muted: oklch(0.20 0.05 145);
+    --muted-foreground: oklch(0.65 0.08 152);
+    --accent: oklch(0.81 0.11 152);
+    --accent-foreground: oklch(0.12 0.03 145);
+    --destructive: oklch(0.60 0.20 25);
+    --destructive-foreground: oklch(0.81 0.11 152);
+    --border: oklch(0.81 0.11 152); 
+    --input: oklch(0.15 0.04 145);
+    --ring: oklch(0.81 0.11 152);
+    --chart-1: oklch(0.81 0.11 152);
+    --chart-2: oklch(0.71 0.11 152);
+    --chart-3: oklch(0.61 0.11 152);
+    --chart-4: oklch(0.51 0.11 152);
+    --chart-5: oklch(0.41 0.11 152);
+    --radius: 0rem;
+    --sidebar-background: oklch(0.12 0.03 145);
+    --sidebar-foreground: oklch(0.81 0.11 152);
+    --sidebar-primary: oklch(0.81 0.11 152);
+    --sidebar-primary-foreground: oklch(0.12 0.03 145);
+    --sidebar-accent: oklch(0.20 0.05 145);
+    --sidebar-accent-foreground: oklch(0.81 0.11 152);
+    --sidebar-border: oklch(0.81 0.11 152);
+    --sidebar-ring: oklch(0.81 0.11 152);
+
+    --nav-bg: oklch(0.12 0.03 145);
+    --nav-item: oklch(0.65 0.08 152);
+    --nav-item-active: oklch(0.81 0.11 152);
+  }
+
+/* ... (rest of file) */
+
+
+/* Amber / Petrochem Theme */
+  .theme-amber {
+    --background: oklch(0.15 0.02 95); /* Light Black / Dark Grey */
+    --foreground: oklch(0.85 0.12 95); /* Opaque Yellow */
+    --card: oklch(0.17 0.02 95);
+    --card-foreground: oklch(0.85 0.12 95);
+    --popover: oklch(0.17 0.02 95);
+    --popover-foreground: oklch(0.85 0.12 95);
+    --primary: oklch(0.85 0.12 95); /* Opaque Yellow Primary */
+    --primary-foreground: oklch(0.15 0.02 95);
+    --secondary: oklch(0.25 0.03 95);
+    --secondary-foreground: oklch(0.85 0.12 95);
+    --muted: oklch(0.25 0.03 95);
+    --muted-foreground: oklch(0.60 0.05 95);
+    --accent: oklch(0.85 0.12 95);
+    --accent-foreground: oklch(0.15 0.02 95);
+    --destructive: oklch(0.60 0.15 25);
+    --destructive-foreground: oklch(0.85 0.12 95);
+    --border: oklch(0.85 0.12 95); /* Matching yellow border - User wants NO border in projects, this is global */
+    --input: oklch(0.20 0.02 95);
+    --ring: oklch(0.85 0.12 95);
+    --chart-1: oklch(0.85 0.12 95);
+    --chart-2: oklch(0.75 0.10 95);
+    --chart-3: oklch(0.65 0.08 95);
+    --chart-4: oklch(0.55 0.06 95);
+    --chart-5: oklch(0.45 0.04 95);
+    --radius: 0rem;
+    --sidebar-background: oklch(0.15 0.02 95);
+    --sidebar-foreground: oklch(0.85 0.12 95);
+    --sidebar-primary: oklch(0.85 0.12 95);
+    --sidebar-primary-foreground: oklch(0.15 0.02 95);
+    --sidebar-accent: oklch(0.25 0.03 95);
+    --sidebar-accent-foreground: oklch(0.85 0.12 95);
+    --sidebar-border: oklch(0.85 0.12 95);
+    --sidebar-ring: oklch(0.85 0.12 95);
+
+    --nav-bg: oklch(0.15 0.02 95);
+    --nav-item: oklch(0.60 0.05 95);
+    --nav-item-active: oklch(0.85 0.12 95);
+  }
 }
 
 @layer base {
+  /* No global reset, allowing themes to define their own radius behavior (via variables or specific overrides) */
+  
   * {
     @apply border-border outline-ring/50;
   }
@@ -253,4 +342,116 @@
     content: '';
     @apply absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-4 bg-primary rounded-full;
   }
+}
+
+/* Specific Overrides */
+
+/* Specific Overrides */
+
+/* Remove border in Projects for Amber theme */
+.theme-amber #projects .group {
+  border-color: transparent !important;
+}
+
+
+/* --- Amber / Petrochem Theme Specifics --- */
+
+/* 1. Force Sharp Edges globally in Amber Theme */
+.theme-amber * {
+  border-radius: 0 !important;
+}
+
+/* 2. Exception: Bookmark Cards in Amber Theme (Must be Rounded) */
+.theme-amber #bookmarks * {
+  /* Allow radius */
+}
+.theme-amber #bookmarks .rounded-xl {
+  border-radius: 0.75rem !important;
+}
+.theme-amber #bookmarks .rounded-lg {
+  border-radius: 0.5rem !important;
+}
+.theme-amber #bookmarks .rounded-md {
+  border-radius: 0.375rem !important;
+}
+.theme-amber #bookmarks .rounded-sm {
+  border-radius: 0.125rem !important;
+}
+
+/* --- Other Themes (Dark/Green/Light) --- */
+/* They fall back to standard Tailwind utility behavior (based on --radius) */
+/* We verify that Circles are round globally if needed, but standard classes should work without !important now. */
+/* Just in case, we can ensure rounded-full is enforced if we have mixed logic, but removing !important is better. */
+
+/* --- Dark Theme Specifics --- */
+.dark #bookmarks input,
+.dark .theme-toggle-btn,
+.dark .lang-switcher-btn {
+  border-radius: 0 !important;
+}
+
+/* --- Retro Theme Overrides --- */
+
+/* Remove border in Projects for Retro theme */
+.theme-retro #projects .group {
+  border-color: transparent !important;
+}
+
+/* Quotes Card Sharp Edges in Retro Theme */
+.theme-retro #quote-card {
+  border-radius: 0 !important;
+}
+
+/* Retro Theme Font Override */
+.theme-retro p, 
+.theme-retro span, 
+.theme-retro li,
+.theme-retro td {
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+/* Titles for Retro Theme - Using Azeret Mono to match Amber theme */
+.theme-retro h1, .theme-retro h2, .theme-retro h3, .theme-retro h4 {
+   font-family: 'Azeret Mono', monospace !important;
+}
+
+/* --- Retro Theme Bookmark Specifics --- */
+.theme-retro #bookmarks .group h4 {
+  color: var(--primary) !important;
+  text-shadow: 0 0 5px oklch(var(--primary) / 0.3);
+}
+
+.theme-retro #bookmarks .group p {
+  color: var(--primary) !important;
+  opacity: 0.9;
+  font-size: 0.85rem !important; /* Increased font size */
+  line-height: 1.4;
+}
+
+.theme-retro #bookmarks .group span,
+.theme-retro #bookmarks .group .opacity-70 {
+  color: var(--primary) !important;
+  opacity: 0.7;
+}
+
+/* Adjust overlay for better contrast with green text if needed */
+.theme-retro #bookmarks .group .bg-gradient-to-t {
+  opacity: 0.95;
+}
+
+/* --- Retro Theme Project Specifics --- */
+.theme-retro #projects .group h3 {
+  color: var(--primary) !important;
+}
+
+.theme-retro #projects .group p,
+.theme-retro #projects .group span:not(.sr-only) {
+  color: var(--primary) !important;
+  opacity: 0.8;
+}
+
+/* Specific for "View Details" which is a span inside the hover overlay */
+.theme-retro #projects .group div[class*="opacity-0"] span {
+  color: var(--primary) !important;
 }

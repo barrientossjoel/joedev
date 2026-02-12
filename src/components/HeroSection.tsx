@@ -84,6 +84,7 @@ const HeroSection = () => {
 
         {/* Quote Card */}
         <div
+          id="quote-card"
           className={`relative rounded-2xl overflow-hidden p-12 border border-border transition-all duration-500 bg-card`}
           style={getBackgroundStyle(displayQuote.background)}
         >
