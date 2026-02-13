@@ -102,7 +102,7 @@ const Article = () => {
                             {title}
                         </h1>
 
-                        <Button variant="outline" size="sm" onClick={handleShare} className="gap-2">
+                        <Button variant="outline" size="sm" onClick={handleShare} className="gap-2 rounded-none">
                             <Share2 size={14} />
                             Share
                         </Button>

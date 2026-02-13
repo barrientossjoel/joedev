@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Heart, Shield, Zap, Skull, Crown, Ghost, Coins, ChevronRight, ShoppingBag, Gem, Droplet } from 'lucide-react';
 import { Button } from './ui/button';
-import { Progress } from './ui/progress';
 
 // --- Types ---
 type GameState = 'MENU' | 'ROOM_SELECTION' | 'COMBAT' | 'EVENT' | 'GAME_OVER' | 'VICTORY' | 'CHARACTER' | 'INVENTORY' | 'CONFIRM_EXIT' | 'MERCHANT' | 'LOOT';
@@ -186,13 +185,13 @@ const BatIcon = (props: React.ComponentProps<'svg'>) => (
 const ENEMY_TEMPLATES = [
     { name: 'Skeleton', Icon: Skull, color: 'text-primary', hpMod: 1.0, atkMod: 1.0, def: 0, dodge: 5, crit: 5, vamp: 0 },
     { name: 'Ghost', Icon: Ghost, color: 'text-primary opacity-80', hpMod: 0.6, atkMod: 0.8, def: 0, dodge: 30, crit: 0, vamp: 0 },
-    { name: 'Slime', Icon: Droplet, color: 'text-green-500', hpMod: 1.4, atkMod: 0.6, def: 2, dodge: 0, crit: 0, vamp: 0 },
-    { name: 'Bat', Icon: BatIcon, color: 'text-purple-400', hpMod: 0.5, atkMod: 0.7, def: 0, dodge: 40, crit: 0, vamp: 15 },
-    { name: 'Orc', Icon: Shield, color: 'text-green-700', hpMod: 1.2, atkMod: 1.2, def: 5, dodge: 0, crit: 10, vamp: 0 },
+    { name: 'Slime', Icon: Droplet, color: 'text-game-success', hpMod: 1.4, atkMod: 0.6, def: 2, dodge: 0, crit: 0, vamp: 0 },
+    { name: 'Bat', Icon: BatIcon, color: 'text-game-info', hpMod: 0.5, atkMod: 0.7, def: 0, dodge: 40, crit: 0, vamp: 15 },
+    { name: 'Orc', Icon: Shield, color: 'text-game-success', hpMod: 1.2, atkMod: 1.2, def: 5, dodge: 0, crit: 10, vamp: 0 },
 ];
 
 const generateRooms = (floor: number): Room[] => {
-    const numOptions = Math.floor(Math.random() * 3) + 2; // 2-4 options
+    const numOptions = Math.floor(Math.random() * 2) + 2; // Reduced to 2-3 options for better UI balance
     const options: Room[] = [];
     let hasRest = false;
 
@@ -203,7 +202,7 @@ const generateRooms = (floor: number): Room[] => {
         const rand = Math.random();
         let type: RoomType = 'ENEMY';
         let description = 'A dark corridor...';
-        let icon = <Ghost size={16} />;
+        let icon = <Ghost size={28} strokeWidth={1.5} />;
         let enemy: Enemy | undefined;
         let merchantItems: (Item | Skill)[] | undefined;
 
@@ -211,7 +210,7 @@ const generateRooms = (floor: number): Room[] => {
             type = 'ENEMY';
             const template = ENEMY_TEMPLATES[Math.floor(Math.random() * ENEMY_TEMPLATES.length)];
             description = `A wild ${template.name} appears.`;
-            icon = <template.Icon size={16} className={template.color.split(' ')[0]} />; // Simplified color for small icon
+            icon = <template.Icon size={28} strokeWidth={1.5} className={template.color.split(' ')[0]} />;
 
             const baseHp = 30 + (floor * 5);
             const baseAtk = 5 + floor;
@@ -231,7 +230,7 @@ const generateRooms = (floor: number): Room[] => {
         } else if (rand < 0.6) {
             type = 'ELITE';
             description = 'Dangerous aura!';
-            icon = <Skull size={16} className="text-red-500" />;
+            icon = <Skull size={28} strokeWidth={1.5} className="text-game-danger" />;
             enemy = {
                 name: 'Dark Knight',
                 hp: Math.floor((60 + floor * 10) * difficultyMod),
@@ -242,30 +241,30 @@ const generateRooms = (floor: number): Room[] => {
                 critChance: 15,
                 vampirism: 10,
                 isElite: true,
-                icon: <Skull size={64} className="text-red-500 animate-pulse" />
+                icon: <Skull size={64} className="text-game-danger animate-pulse" />
             };
         } else if (rand < 0.7) {
             type = 'TREASURE';
             description = 'Glimmering loot.';
-            icon = <Crown size={16} className="text-yellow-500" />;
+            icon = <Crown size={28} strokeWidth={1.5} className="text-game-warning" />; // Updated size and strokeWidth
         } else if (rand < 0.8 && !hasRest) {
             type = 'REST';
             description = 'A safe spot.';
-            icon = <Heart size={16} className="text-green-500" />;
+            icon = <Heart size={28} strokeWidth={1.5} className="text-game-success" />; // Updated size and strokeWidth
             hasRest = true;
         } else if (rand < 0.9) {
             type = 'MERCHANT';
             description = 'A wandering trader.';
-            icon = <ShoppingBag size={16} className="text-blue-400" />;
+            icon = <ShoppingBag size={28} strokeWidth={1.5} className="text-game-info" />; // Updated size and strokeWidth
             // Generate shop Items
             merchantItems = [];
             for (let k = 0; k < 3; k++) {
                 if (Math.random() > 0.5) {
                     const item = ITEMS[Math.floor(Math.random() * ITEMS.length)];
-                    merchantItems.push({ ...item, id: `${item.id}-shop-${Date.now()}-${k}` });
+                    merchantItems.push({ ...item, value: Math.floor(item.value * 0.8), id: `${item.id}-shop-${Date.now()}-${k}` });
                 } else {
                     const skill = SKILL_POOL[Math.floor(Math.random() * SKILL_POOL.length)];
-                    merchantItems.push({ ...skill, id: `${skill.id}-shop-${Date.now()}-${k}` });
+                    merchantItems.push({ ...skill, value: Math.floor(skill.value * 0.8), id: `${skill.id}-shop-${Date.now()}-${k}` });
                 }
             }
         } else {
@@ -275,7 +274,7 @@ const generateRooms = (floor: number): Room[] => {
         }
 
         options.push({
-            id: `room-${Date.now()}-${i}`,
+            id: `room - ${Date.now()} -${i} `,
             type,
             description,
             icon,
@@ -289,7 +288,7 @@ const generateRooms = (floor: number): Room[] => {
 const generateLoot = (floor: number): Item | null => {
     if (Math.random() > 0.3 - (floor * 0.01)) {
         const item = ITEMS[Math.floor(Math.random() * ITEMS.length)];
-        return { ...item, id: `${item.id}-${Date.now()}` };
+        return { ...item, id: `${item.id} -${Date.now()} ` };
     }
     return null;
 }
@@ -392,7 +391,7 @@ export function Game({ onExit }: GameProps) {
                 pWithStats.hp = Math.min(pWithStats.hp, pWithStats.maxHp); // Clamp HP? Or keep it?
                 return pWithStats;
             });
-            addLog(`Auto-equipped ${item.name}.`);
+            addLog(`Auto - equipped ${item.name}.`);
             finishRoom();
         } else {
             // Manual Decision Needed
@@ -441,7 +440,7 @@ export function Game({ onExit }: GameProps) {
             else if (item.type === 'ACCESSORY') { oldItem = newEquipped.accessory; newEquipped.accessory = item; }
             else if (item.type === 'CONSUMABLE') {
                 const restored = item.stats.hp || 0;
-                addLog(`Used ${item.name}. +${restored} HP.`);
+                addLog(`Used ${item.name}.+${restored} HP.`);
                 return { ...prev, hp: Math.min(prev.maxHp, prev.hp + restored), inventory: newInventory };
             }
 
@@ -479,7 +478,7 @@ export function Game({ onExit }: GameProps) {
     const learnSkill = (skill: Skill) => {
         setPlayer(prev => {
             if (prev.skills.length < 4) {
-                addLog(`Learned ${skill.name}!`);
+                addLog(`Learned ${skill.name} !`);
                 return { ...prev, skills: [...prev.skills, skill] };
             } else {
                 // For now, auto-add to "spare" inventory or just replace last?
@@ -494,7 +493,7 @@ export function Game({ onExit }: GameProps) {
         setCurrentRoom(room);
         if (room.type === 'ENEMY' || room.type === 'ELITE') {
             setGameState('COMBAT');
-            addLog(`Encountered ${room.enemy?.name}!`);
+            addLog(`Encountered ${room.enemy?.name} !`);
         } else if (room.type === 'TREASURE') {
             // Chance for Diamond
             if (Math.random() < 0.03) { // 3% for Diamond
@@ -508,7 +507,7 @@ export function Game({ onExit }: GameProps) {
             addLog(`Found ${goldFound} gold!`);
 
             if (item) {
-                addLog(`You found ${item.name}!`);
+                addLog(`You found ${item.name} !`);
                 handleLootAcquisition(item);
             } else {
                 setGameState('EVENT'); // Done
@@ -520,7 +519,7 @@ export function Game({ onExit }: GameProps) {
             setGameState('EVENT');
             const heal = Math.floor(player.maxHp * 0.3);
             setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + heal) }));
-            addLog(`Rested. +${heal} HP.`);
+            addLog(`Rested. + ${heal} HP.`);
         } else {
             setGameState('EVENT');
             addLog("Nothing happened...");
@@ -559,7 +558,7 @@ export function Game({ onExit }: GameProps) {
                 dmg = Math.max(1, dmg - effectiveDef);
 
                 enemy.hp -= dmg;
-                addLog(`Used ${skill.name}! ${isCrit ? 'CRITICAL! ' : ''}Hit for ${dmg}.`);
+                addLog(`Used ${skill.name} !${isCrit ? 'CRITICAL! ' : ''}Hit for ${dmg}.`);
 
                 // Vampirism
                 if (player.vampirism > 0) {
@@ -574,12 +573,12 @@ export function Game({ onExit }: GameProps) {
         } else if (skill.type === 'DEFENSE') {
             // Power acts as DMG reduction multiplier (0.5 = 50% taken)
             skillBonusDefense = eDmg * (1 - skill.power);
-            addLog(`${skill.name}! You brace yourself.`);
+            addLog(`${skill.name} !You brace yourself.`);
 
             // Counter logic
             const counterDmg = Math.floor(pDmg * 0.5);
             enemy.hp -= counterDmg;
-            addLog(`Counter-attack for ${counterDmg}!`);
+            addLog(`Counter - attack for ${counterDmg}!`);
         } else if (skill.type === 'HEAL') {
             let heal = skill.power;
             // Crit Heal? Why not.
@@ -588,16 +587,16 @@ export function Game({ onExit }: GameProps) {
                 addLog(`Critical Heal!`);
             }
             setPlayer(p => ({ ...p, hp: Math.min(p.maxHp, p.hp + heal) }));
-            addLog(`Used ${skill.name}. +${Math.floor(heal)} HP.`);
+            addLog(`Used ${skill.name}.+${Math.floor(heal)} HP.`);
         } else if (skill.type === 'BUFF') {
-            addLog(`${skill.name}! (Buff not impl yet)`);
+            addLog(`${skill.name} !(Buff not impl yet)`);
         }
 
         // Enemy Turn
         if (enemy.hp > 0) {
             // Dodge Check
             if (Math.random() * 100 < player.dodgeChance) {
-                addLog(`Dodged ${enemy.name}'s attack!`);
+                addLog(`Dodged ${enemy.name} 's attack!`);
             } else {
                 const damage = Math.max(0, Math.floor(eDmg - pDef - skillBonusDefense));
 
@@ -644,9 +643,6 @@ export function Game({ onExit }: GameProps) {
             setDiamonds(d => d + 1);
             addLog("Enemy dropped a Diamond!");
         }
-
-        addLog(`Victory! +${xpGain} XP`);
-
         setPlayer(p => {
             let newXp = p.xp + xpGain;
             let newLevel = p.level;
@@ -656,16 +652,19 @@ export function Game({ onExit }: GameProps) {
                 newXp -= p.xpToNext;
                 newLevel++;
                 addLog("Level Up!");
-                // Stat growth baked into calculateStats base?
-                // Simple growth:
                 newBaseRef = {
                     ...p,
                     baseMaxHp: p.baseMaxHp + 10,
                     baseAttack: p.baseAttack + 2
                 };
             }
-            const healedP = { ...newBaseRef, xp: newXp, level: newLevel, hp: Math.min(newBaseRef.baseMaxHp, p.hp + 20) };
-            return calculateStats(healedP);
+
+            const goldGain = Math.floor(15 + (newLevel * 8) + Math.random() * 20);
+            addLog(`Victory! +${xpGain} XP, +${goldGain} Gold`);
+
+            const healedP = { ...newBaseRef, xp: newXp, level: newLevel, hp: p.hp + 5, gold: p.gold + goldGain };
+            const stats = calculateStats(healedP);
+            return { ...stats, hp: Math.min(stats.maxHp, stats.hp) };
         });
 
         if (loot) {
@@ -727,7 +726,7 @@ export function Game({ onExit }: GameProps) {
                 if (e.key === 'Enter' || e.key === ' ') finishRoom();
             } else if (gameState === 'LOOT') {
                 // Compare logic keys? 
-                if (e.key.toLowerCase() === 'y' || e.key === 'Enter') resolveLoot('SWAP');
+                if (e.key.toLowerCase() === 'y' || e.key === ' ') resolveLoot('SWAP');
                 if (e.key.toLowerCase() === 'n') resolveLoot('DISCARD');
                 if (e.key.toLowerCase() === 't') resolveLoot('TAKE'); // If we have inventory space
             } else if (gameState === 'EVENT') {
@@ -749,11 +748,11 @@ export function Game({ onExit }: GameProps) {
         return (
             <div className="flex flex-col items-center justify-center h-64 text-center space-y-4 animate-in fade-in outline-none relative" ref={containerRef} tabIndex={0} onClick={() => containerRef.current?.focus()}>
                 <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-40"></div>
-                <div className="relative z-50 p-6 border border-red-500/50 rounded bg-black w-3/4 max-w-sm">
-                    <h1 className="text-xl font-bold text-red-500 mb-2">QUIT GAME?</h1>
+                <div className="relative z-50 p-6 border border-game-danger/50 rounded bg-black w-3/4 max-w-sm">
+                    <h1 className="text-xl font-bold text-game-danger mb-2">QUIT GAME?</h1>
                     <p className="text-[10px] text-primary/60 mb-6">Progress will be lost.</p>
                     <div className="flex gap-4 justify-center">
-                        <Button variant="outline" size="sm" className="h-8 border-red-500/50 text-red-400 hover:bg-red-950 hover:text-red-200" onClick={onExit}>[Y] Yes</Button>
+                        <Button variant="outline" size="sm" className="h-8 border-game-danger/50 text-game-danger hover:bg-game-danger/20 hover:text-game-danger" onClick={onExit}>[Y] Yes</Button>
                         <Button variant="outline" size="sm" className="h-8 border-primary/50 text-primary hover:bg-primary/10" onClick={() => setGameState(previousState)}>[N] No</Button>
                     </div>
                 </div>
@@ -771,8 +770,8 @@ export function Game({ onExit }: GameProps) {
 
     if (gameState === 'GAME_OVER') return (
         <div className="flex flex-col items-center justify-center h-64 text-center space-y-4 animate-in fade-in outline-none" ref={containerRef} tabIndex={0} onClick={() => containerRef.current?.focus()}>
-            <Skull size={48} className="text-red-600 mb-4" />
-            <h1 className="text-2xl font-bold text-red-500">YOU DIED</h1>
+            <Skull size={48} className="text-game-danger mb-4" />
+            <h1 className="text-2xl font-bold text-game-danger">YOU DIED</h1>
             <p className="text-xs text-primary/60">Floor Reached: {player.floor}</p>
             <div className="mt-8 animate-pulse text-xs opacity-70">[ Press ENTER to Menu ]</div>
         </div>
@@ -782,31 +781,65 @@ export function Game({ onExit }: GameProps) {
         <div className={`flex flex-col h-full max-h-[22rem] overflow-hidden font-mono text-xs select-none relative p-1 outline-none transition-colors ${isFocused ? 'bg-background' : 'opacity-70 grayscale'}`} ref={containerRef} tabIndex={0} onClick={() => containerRef.current?.focus()}>
             {!isFocused && <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-[1px]"><div className="text-white bg-black/80 px-3 py-1 rounded border border-white/20 animate-pulse cursor-pointer">[ Click to Focus ]</div></div>}
 
-            {/* Header */}
-            <div className="flex justify-between items-end border-b border-primary/20 pb-2 mb-2 px-1">
-                <div className="grid grid-cols-3 gap-x-4 gap-y-1">
-                    <div className="flex items-center gap-1 text-primary"><Heart size={10} /> <span>{Math.ceil(player.hp)}/{player.maxHp}</span></div>
-                    <div className="flex items-center gap-1 text-primary/80"><Shield size={10} /> <span>{player.defense}</span></div>
-                    <div className="flex items-center gap-1 text-blue-400"><Zap size={10} /> <span>Lvl {player.level}</span></div>
-                    <div className="flex items-center gap-1 text-yellow-500"><Coins size={10} /> <span>{player.gold}G</span></div>
-                    <div className="flex items-center gap-1 text-cyan-400"><Gem size={10} /> <span>{diamonds}</span></div>
+            {/* Compact Header to prevent overlap */}
+            <div className="flex justify-between items-center border-b border-primary/20 pb-1.5 mb-2 px-2 bg-primary/5">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 max-w-[70%]">
+                    <div className="flex items-center gap-1.5 text-primary"><Heart size={12} strokeWidth={2.5} /> <span className="text-xs font-bold leading-none">{Math.ceil(player.hp)}/{player.maxHp}</span></div>
+                    <div className="flex items-center gap-1.5 text-primary/80"><Shield size={12} strokeWidth={2.5} /> <span className="text-xs font-bold leading-none">{player.defense}</span></div>
+                    <div className="flex items-center gap-1.5 text-game-info"><Zap size={12} strokeWidth={2.5} /> <span className="text-xs font-bold leading-none">L{player.level}</span></div>
+                    <div className="flex items-center gap-1.5 text-game-warning"><Coins size={12} strokeWidth={2.5} /> <span className="text-xs font-bold leading-none">{player.gold}</span></div>
+                    <div className="flex items-center gap-1.5 text-game-info"><Gem size={12} strokeWidth={2.5} /> <span className="text-xs font-bold leading-none">{diamonds}</span></div>
                 </div>
-                <div className="text-right text-xl font-bold text-primary/30">FL {player.floor}</div>
+                <div className="text-right text-xl font-black text-primary/40 tracking-tighter shrink-0">FL {player.floor}</div>
             </div>
 
-            {/* Content */}
+            {/* Content Container */}
             <div className="flex-1 flex flex-col justify-center min-h-0">
                 {gameState === 'ROOM_SELECTION' && (
-                    <div className="space-y-2">
-                        <div className="flex justify-between text-primary/50 text-[10px] mb-2 px-2"><span>[C] Character</span><span>- Choose your path -</span><span>[I] Inventory</span></div>
-                        <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-col h-full animate-in fade-in py-1">
+                        {/* maximized Top Nav */}
+                        <div className="flex justify-between items-center text-xs uppercase tracking-[0.2em] font-black mb-2 px-3">
+                            <div className="flex items-center gap-2 text-primary/80">
+                                <span className="bg-primary/20 px-2 py-0.5 rounded border border-primary/40 text-[9px] font-mono shadow-sm">C</span>
+                                <span className="text-[10px]">STATUS</span>
+                            </div>
+                            <div className="text-primary font-black italic border-x-2 border-primary/20 px-4 py-0.5 bg-primary/5 text-[11px]">PROJECT PATH</div>
+                            <div className="flex items-center gap-2 text-primary/80">
+                                <span className="bg-primary/20 px-2 py-0.5 rounded border border-primary/40 text-[9px] font-mono shadow-sm">I</span>
+                                <span className="text-[10px]">ITEMS</span>
+                            </div>
+                        </div>
+
+                        {/* Adaptive Room Cards */}
+                        <div className={`grid ${rooms.length === 4 ? 'grid-cols-2' : rooms.length === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-2 px-1 flex-1 min-h-0`}>
                             {rooms.map((room, i) => (
-                                <div key={room.id} className="group flex flex-col items-center justify-center gap-1 p-2 border border-primary/20 hover:bg-white/5 cursor-pointer rounded transition-all aspect-square sm:aspect-auto sm:h-24" onClick={() => enterRoom(room)}>
-                                    <div className="text-primary group-hover:scale-110 transition-transform mb-1">{room.icon}</div>
-                                    <div className="text-center">
-                                        <div className="font-bold text-primary group-hover:text-white transition-colors text-xs"><span className="opacity-50 mr-1">[{i + 1}]</span>{room.type === 'ENEMY' ? room.enemy?.name : room.type}</div>
-                                        <div className="text-primary/50 text-[9px] leading-tight mt-1 line-clamp-2">{room.description}</div>
+                                <div
+                                    key={room.id}
+                                    className={`group flex flex-col items-center justify-between p-2 border border-primary/20 hover:bg-primary/5 hover:border-primary/60 cursor-pointer rounded transition-all relative overflow-hidden ${rooms.length === 4 ? 'h-28' : 'h-40'} shadow-inner`}
+                                    onClick={() => enterRoom(room)}
+                                >
+                                    {/* Number Badge */}
+                                    <div className="absolute top-1 left-1 text-[9px] font-mono opacity-40 font-black">0{i + 1}</div>
+
+                                    {/* Icon Container */}
+                                    <div className="flex-1 flex items-center justify-center">
+                                        <div className="text-primary group-hover:scale-125 transition-transform duration-300 drop-shadow-[0_0_8px_var(--primary)] p-2">
+                                            {room.icon}
+                                        </div>
                                     </div>
+
+                                    {/* Info Panel */}
+                                    <div className="w-full text-center border-t border-primary/20 pt-1.5 bg-black/20">
+                                        <div className="text-[11px] font-black text-primary uppercase tracking-wider mb-0.5 group-hover:text-white transition-colors truncate px-1 drop-shadow-sm">
+                                            {room.type === 'ENEMY' ? room.enemy?.name : room.type}
+                                        </div>
+                                        <div className="text-[9px] text-primary/80 leading-tight line-clamp-1 italic px-1 font-medium">
+                                            {room.description}
+                                        </div>
+                                    </div>
+
+                                    {/* Scanning line for rooms */}
+                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/10 to-transparent h-2 w-full -translate-y-full group-hover:animate-[scan-v_3s_linear_infinite] pointer-events-none"></div>
                                 </div>
                             ))}
                         </div>
@@ -814,180 +847,284 @@ export function Game({ onExit }: GameProps) {
                 )}
 
                 {gameState === 'COMBAT' && currentRoom?.enemy && (
-                    <div className="flex flex-col items-center animate-in zoom-in-95 duration-200">
-                        <div className="mb-4 relative">
-                            <div className="absolute inset-0 bg-red-500/10 blur-xl rounded-full"></div>
-                            <div className="relative z-10 drop-shadow-lg">{currentRoom.enemy.icon}</div>
+                    <div className="flex flex-col items-center animate-in zoom-in-95 duration-200 py-1">
+                        <div className="mb-1.5 relative">
+                            {/* Enemy Icon with theme-aware glow */}
+                            <div className="flex flex-col items-center justify-center p-1 relative min-h-[5rem]">
+                                <div className="text-base font-bold text-game-danger mb-1 tracking-widest uppercase drop-shadow-[0_0_5px_var(--game-danger)]">{currentRoom.enemy.name}</div>
+                                <div
+                                    className="scale-100 origin-center transition-transform duration-500"
+                                    style={{ filter: 'drop-shadow(0 0 10px var(--game-danger))' }}
+                                >
+                                    {currentRoom.enemy.icon}
+                                </div>
+                            </div>
                         </div>
-                        <div className="text-lg font-bold text-red-400 mb-1">{currentRoom.enemy.name}</div>
-                        <Progress value={(currentRoom.enemy.hp / currentRoom.enemy.maxHp) * 100} className="h-2 w-32 bg-red-950 [&>div]:bg-red-500 mb-4" />
 
-                        <div className="grid grid-cols-2 gap-2 w-full max-w-sm mt-2">
+                        {/* Standard Segmented Health Bar */}
+                        <div className="flex flex-col gap-1 w-48 mb-2">
+                            <div className="flex justify-between text-[9px] uppercase tracking-tighter opacity-50 font-bold">
+                                <span className="text-primary">Target Status</span>
+                                <span className="text-game-danger">{Math.ceil((currentRoom.enemy.hp / currentRoom.enemy.maxHp) * 100)}%</span>
+                            </div>
+                            <div className="h-3 w-full bg-black/40 border border-game-danger/30 p-[1px] relative overflow-hidden">
+                                <div
+                                    className="h-full bg-game-danger transition-all duration-500 relative"
+                                    style={{
+                                        width: `${(currentRoom.enemy.hp / currentRoom.enemy.maxHp) * 100}%`,
+                                        backgroundImage: 'linear-gradient(90deg, rgba(0,0,0,0.3) 1px, transparent 1px)',
+                                        backgroundSize: '12.5% 100%',
+                                        boxShadow: '0 0 15px var(--game-danger)'
+                                    }}
+                                />
+                                {/* Scanning line effect */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent w-full h-full -translate-x-full animate-[scan_2s_linear_infinite]"></div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 w-full max-w-sm">
                             {player.skills.map((skill, i) => (
-                                <Button key={i} size="sm" variant="outline" className="text-[10px] h-10 border-primary/30 hover:bg-white/10 flex flex-col items-start px-2 py-1" onClick={() => useSkill(i)}>
-                                    <span className="font-bold text-primary">[{i + 1}] {skill.name}</span>
-                                    <span className="text-[8px] opacity-50">{skill.type}</span>
+                                <Button
+                                    key={i}
+                                    variant="outline"
+                                    className="h-11 border-primary/20 hover:bg-primary/5 hover:border-primary/40 flex flex-col items-center justify-center px-4 gap-0.5 transition-all active:scale-95 group relative overflow-hidden"
+                                    onClick={() => useSkill(i)}
+                                >
+                                    <span className="font-bold text-primary text-[11px] truncate w-full text-center">[{i + 1}] {skill.name}</span>
+                                    <span className="text-[9px] opacity-40 uppercase tracking-[0.2em] font-medium leading-tight">{skill.type}</span>
+
+                                    {/* Subtle corner detail for "Retro-Tech" look */}
+                                    <div className="absolute top-0 left-0 w-1 h-1 border-t border-l border-primary/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                    <div className="absolute bottom-0 right-0 w-1 h-1 border-b border-r border-primary/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 </Button>
                             ))}
                         </div>
                     </div>
                 )}
 
-                {gameState === 'MERCHANT' && (
-                    <div className="space-y-4 animate-in fade-in px-4">
-                        <div className="text-center border-b border-primary/20 pb-2 font-bold text-blue-400">MERCHANT</div>
-                        <div className="grid grid-cols-1 gap-2">
-                            {currentRoom?.merchantItems?.map((item, i) => (
-                                <div key={i} className={`flex justify-between items-center p-2 border border-primary/10 rounded hover:bg-white/5 cursor-pointer ${player.gold >= item.value ? 'text-yellow-400' : 'text-red-500'}`} onClick={() => buyItem(item)}>
-                                    <div className="flex gap-2">
-                                        <span className="opacity-50 font-bold">[{i + 1}]</span>
-                                        <div>
-                                            <div className="font-bold">{item.name}</div>
-                                            <div className="text-[9px] opacity-70">{item.description}</div>
+                {gameState === 'MERCHANT' && currentRoom?.merchantItems && (
+                    <div className="flex flex-col h-full animate-in fade-in py-1">
+                        <div className="text-sm font-black text-game-info mb-3 uppercase tracking-[0.2em] text-center">Black Market</div>
+                        <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto px-1 pr-2 scrollbar-none">
+                            {currentRoom.merchantItems.map((item, i) => {
+                                const isSkill = 'power' in item;
+                                const itemStats = !isSkill ? (item as Item).stats : null;
+                                const slot = !isSkill ? ((item as Item).type === 'WEAPON' ? 'weapon' : (item as Item).type === 'ARMOR' ? 'armor' : (item as Item).type === 'ACCESSORY' ? 'accessory' : null) : null;
+                                const equipped = slot ? player.equipped[slot] : null;
+
+                                return (
+                                    <div
+                                        key={item.id}
+                                        className={`flex justify-between items-center p-2.5 border border-primary/10 rounded hover:bg-primary/5 hover:border-primary/30 cursor-pointer transition-all ${player.gold >= item.value ? 'text-game-warning' : 'text-game-danger'}`}
+                                        onClick={() => buyItem(item)}
+                                    >
+                                        <div className="flex gap-3 text-xs flex-1">
+                                            <span className="opacity-40 font-mono text-[10px] self-start mt-0.5">[{i + 1}]</span>
+                                            <div className="flex flex-col">
+                                                <div className="font-bold leading-tight group-hover:translate-x-1 transition-transform">{item.name}</div>
+                                                <div className="text-[10px] opacity-50 leading-tight mt-1 line-clamp-1">{item.description}</div>
+                                            </div>
                                         </div>
+
+                                        {/* Stat Diff Panel */}
+                                        {equipped && itemStats && (
+                                            <div className="hidden sm:flex gap-2 mx-2 text-[9px] font-bold">
+                                                {[
+                                                    { key: 'attack', label: 'ATK' },
+                                                    { key: 'defense', label: 'DEF' },
+                                                    { key: 'maxHp', label: 'HP' }
+                                                ].map(s => {
+                                                    const val = (itemStats as any)[s.key] || 0;
+                                                    const eqVal = (equipped.stats as any)[s.key] || 0;
+                                                    const diff = val - eqVal;
+                                                    if (diff === 0) return null;
+                                                    return (
+                                                        <span key={s.key} className={diff > 0 ? 'text-game-success' : 'text-game-danger'}>
+                                                            {s.label}{diff > 0 ? '+' : ''}{diff}
+                                                        </span>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+
+                                        <div className="text-base font-bold ml-2 shrink-0 border-l border-primary/10 pl-3">{item.value}G</div>
                                     </div>
-                                    <div className="text-xs font-bold">{item.value}G</div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
-                        <div className="text-center text-[10px] opacity-50 mt-4">[ Enter ] Leave</div>
+                        <div className="text-center text-[10px] opacity-40 mt-auto py-2 uppercase tracking-widest">[ Enter ] Leave Shop</div>
                     </div>
                 )}
 
                 {gameState === 'LOOT' && pendingLoot && (
-                    <div className="text-center space-y-4 animate-in fade-in px-4">
-                        <div className="text-lg font-bold text-yellow-500">BETTER GEAR?</div>
-                        <div className="grid grid-cols-2 gap-4 text-left">
-                            {(() => {
-                                const slot = pendingLoot.type === 'WEAPON' ? 'weapon' : pendingLoot.type === 'ARMOR' ? 'armor' : 'accessory';
-                                const equippedItem = player.equipped[slot];
+                    <div className="flex flex-col h-full animate-in fade-in py-1">
+                        <div className="text-sm font-black text-game-warning mb-1 uppercase tracking-tighter text-center italic">Better Gear?</div>
+                        <div className="flex-1 flex flex-col justify-center min-h-0">
+                            <div className="flex justify-center gap-2 items-stretch px-2 mb-1.5">
+                                {(() => {
+                                    const slot = pendingLoot.type === 'WEAPON' ? 'weapon' : pendingLoot.type === 'ARMOR' ? 'armor' : 'accessory';
+                                    const equippedItem = player.equipped[slot];
 
-                                const renderStatRow = (label: string, val: number | undefined, compareVal: number | undefined, isComparing: boolean) => {
-                                    if (!val && !compareVal) return null;
-                                    const v = val || 0;
-                                    const c = compareVal || 0;
-                                    const diff = v - c;
+                                    const renderStats = (item: Item | null, isComparing: boolean) => {
+                                        const stats: { label: string; key: keyof Item['stats'] }[] = [
+                                            { label: 'ATK', key: 'attack' },
+                                            { label: 'DEF', key: 'defense' },
+                                            { label: 'HP', key: 'maxHp' },
+                                        ];
 
+                                        return (
+                                            <div className="space-y-1 flex flex-col justify-center h-full">
+                                                {stats.map(({ label, key }) => {
+                                                    const v = item?.stats[key] || 0;
+                                                    const equippedV = equippedItem?.stats[key] || 0;
+                                                    const diff = v - equippedV;
+
+                                                    return (
+                                                        <div key={label} className="flex justify-between items-center border-b border-primary/5 pb-0.5 last:border-0 h-7">
+                                                            <span className="opacity-40 uppercase tracking-[0.15em] text-[11px] font-black">{label}</span>
+                                                            <div className="flex items-center gap-2 font-black">
+                                                                <span className="text-primary text-sm">{v}</span>
+                                                                {isComparing && diff !== 0 && (
+                                                                    <span className={`text-[11px] px-1.5 py-0.5 rounded-sm font-mono ${diff > 0 ? 'bg-game-success/20 text-game-success' : 'bg-game-danger/10 text-game-danger'}`}>
+                                                                        {diff > 0 ? `+${diff}` : diff}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        );
+                                    };
                                     return (
-                                        <div className="flex justify-between items-center">
-                                            <span className="opacity-70">{label}</span>
-                                            <span>
-                                                {v}
-                                                {isComparing && diff !== 0 && (
-                                                    <span className={`ml-1 text-[9px] ${diff > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                                        {diff > 0 ? `(+${diff})` : `(${diff})`}
-                                                    </span>
-                                                )}
-                                            </span>
+                                        <div className="flex gap-2 h-40">
+                                            <div className="flex-1 border border-primary/10 p-2 rounded bg-black/20 flex flex-col shadow-inner">
+                                                <div className="text-[10px] opacity-30 uppercase tracking-[0.2em] mb-1 border-b border-primary/5 pb-0.5 font-bold text-center">EQUIPPED</div>
+                                                <div className="text-primary font-black truncate text-xs mb-1.5 border-b border-primary/10 pb-0.5 uppercase tracking-tight text-center">
+                                                    {equippedItem?.name || 'EMPTY'}
+                                                </div>
+                                                <div className="flex-1 overflow-hidden">{renderStats(equippedItem, false)}</div>
+                                            </div>
+                                            <div className="flex-1 border border-game-warning/30 p-2 rounded bg-game-warning/5 flex flex-col shadow-[0_0_20px_rgba(var(--game-warning),0.05)]">
+                                                <div className="text-[10px] opacity-60 uppercase tracking-[0.2em] text-game-warning mb-1 border-b border-game-warning/10 pb-0.5 font-black text-center">FOUND</div>
+                                                <div className="text-game-warning font-black truncate text-xs mb-1.5 uppercase tracking-tight text-center">{pendingLoot.name}</div>
+                                                <div className="flex-1 overflow-hidden">{renderStats(pendingLoot, true)}</div>
+                                            </div>
                                         </div>
                                     );
-                                };
-
-                                return (
-                                    <>
-                                        <div className="p-2 border border-primary/20 bg-black/50 flex flex-col">
-                                            <div className="text-[10px] opacity-50 uppercase mb-1">Equipped</div>
-                                            <div className="text-primary font-bold truncate mb-2">
-                                                {equippedItem?.name || 'Empty'}
-                                            </div>
-                                            {equippedItem && (
-                                                <div className="text-[10px] space-y-1">
-                                                    {renderStatRow("ATK", equippedItem.stats.attack, 0, false)}
-                                                    {renderStatRow("DEF", equippedItem.stats.defense, 0, false)}
-                                                    {renderStatRow("HP", equippedItem.stats.maxHp, 0, false)}
-                                                    {renderStatRow("CRI", equippedItem.stats.critChance, 0, false)}
-                                                    {renderStatRow("DGE", equippedItem.stats.dodgeChance, 0, false)}
-                                                    {renderStatRow("VMP", equippedItem.stats.vampirism, 0, false)}
-                                                    {renderStatRow("RFL", equippedItem.stats.reflect, 0, false)}
-                                                    {renderStatRow("PRC", equippedItem.stats.pierce, 0, false)}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="p-2 border border-yellow-500/50 bg-yellow-900/10 flex flex-col">
-                                            <div className="text-[10px] opacity-50 uppercase mb-1">Found</div>
-                                            <div className="text-yellow-400 font-bold truncate mb-2">{pendingLoot.name}</div>
-                                            <div className="text-[10px] space-y-1">
-                                                {renderStatRow("ATK", pendingLoot.stats.attack, equippedItem?.stats.attack, true)}
-                                                {renderStatRow("DEF", pendingLoot.stats.defense, equippedItem?.stats.defense, true)}
-                                                {renderStatRow("HP", pendingLoot.stats.maxHp, equippedItem?.stats.maxHp, true)}
-                                                {renderStatRow("CRI", pendingLoot.stats.critChance, equippedItem?.stats.critChance, true)}
-                                                {renderStatRow("DGE", pendingLoot.stats.dodgeChance, equippedItem?.stats.dodgeChance, true)}
-                                                {renderStatRow("VMP", pendingLoot.stats.vampirism, equippedItem?.stats.vampirism, true)}
-                                                {renderStatRow("RFL", pendingLoot.stats.reflect, equippedItem?.stats.reflect, true)}
-                                                {renderStatRow("PRC", pendingLoot.stats.pierce, equippedItem?.stats.pierce, true)}
-                                            </div>
-                                            <div className="text-[10px] opacity-70 mt-auto pt-2 border-t border-yellow-500/20">{pendingLoot.description}</div>
-                                        </div>
-                                    </>
-                                );
-                            })()}
+                                })()}
+                            </div>
                         </div>
-                        <div className="flex justify-center gap-4 mt-4">
-                            <Button size="sm" variant="outline" className="text-yellow-400 border-yellow-500/50" onClick={() => resolveLoot('SWAP')}>[Y/Enter] Swap</Button>
-                            <Button size="sm" variant="outline" className="text-primary border-primary/50" onClick={() => resolveLoot('DISCARD')}>[N] Discard</Button>
-                            <Button size="sm" variant="outline" className="text-blue-400 border-blue-500/50" onClick={() => resolveLoot('TAKE')}>[T] Take</Button>
+                        <div className="flex justify-center gap-2 pb-1">
+                            <Button size="sm" variant="outline" className="text-xs h-7 px-3 border-game-warning/40 text-game-warning font-bold" onClick={() => resolveLoot('SWAP')}>[Space] Swap</Button>
+                            <Button size="sm" variant="outline" className="text-xs h-7 px-3 border-primary/20 opacity-60" onClick={() => resolveLoot('DISCARD')}>[N] Pass</Button>
+                            <Button size="sm" variant="outline" className="text-xs h-7 px-3 border-game-info/40 text-game-info font-bold" onClick={() => resolveLoot('TAKE')}>[T] Take</Button>
                         </div>
                     </div>
                 )}
 
                 {gameState === 'EVENT' && (
-                    <div className="text-center space-y-4 animate-in fade-in">
-                        <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg inline-block">{currentRoom?.icon}</div>
-                        <p className="text-sm text-primary/80">{currentRoom?.type === 'TREASURE' ? "Looted." : currentRoom?.type === 'REST' ? "Refreshed." : "Nothing remains."}</p>
-                        <div className="text-xs animate-pulse opacity-50 mt-4">[ Press Space/Enter ]</div>
+                    <div className="text-center space-y-2 animate-in fade-in py-4 flex flex-col items-center justify-center h-full">
+                        <div className="p-4 bg-primary/10 border border-primary/30 rounded inline-block scale-110 mb-4 shadow-[0_0_20px_rgba(var(--primary),0.1)]">
+                            {React.isValidElement(currentRoom?.icon)
+                                ? React.cloneElement(currentRoom.icon as any, { size: 48, strokeWidth: 1.5 })
+                                : currentRoom?.icon}
+                        </div>
+                        <p className="text-base font-bold text-primary italic uppercase tracking-wider">{currentRoom?.type === 'TREASURE' ? "Room looted." : currentRoom?.type === 'REST' ? "Vitality restored." : "Path remains clear."}</p>
+                        <div className="text-xs animate-pulse opacity-40 mt-8 tracking-[0.3em] font-black">[ Space / Enter ]</div>
                     </div>
                 )}
 
                 {gameState === 'CHARACTER' && (
-                    <div className="space-y-4 px-4 animate-in fade-in">
-                        <div className="text-center font-bold text-primary border-b border-primary/20 pb-1">HERO STATUS</div>
-                        <div className="grid grid-cols-2 gap-4 text-[10px]">
-                            <div className="space-y-1">
-                                <div className="text-primary/50 uppercase">Stats</div>
-                                <div className="flex justify-between"><span>ATK</span> <span className="text-red-400">{player.attack}</span></div>
-                                <div className="flex justify-between"><span>DEF</span> <span className="text-blue-400">{player.defense}</span></div>
-                                <div className="flex justify-between"><span>HP</span> <span className="text-green-400">{Math.ceil(player.hp)}/{player.maxHp}</span></div>
-                                <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 mt-2 pt-2 border-t border-primary/10">
-                                    <div className="flex justify-between"><span>CRI</span> <span className="text-yellow-400">{player.critChance}%</span></div>
-                                    <div className="flex justify-between"><span>DGE</span> <span className="text-cyan-400">{player.dodgeChance}%</span></div>
-                                    <div className="flex justify-between"><span>VMP</span> <span className="text-red-600">{player.vampirism}%</span></div>
-                                    <div className="flex justify-between"><span>RFL</span> <span className="text-purple-400">{player.reflect}%</span></div>
+                    <div className="flex flex-col h-full px-4 animate-in fade-in py-1">
+                        <div className="text-sm font-black text-primary mb-3 uppercase tracking-[0.2em] text-center italic">Hero Status</div>
+
+                        <div className="grid grid-cols-2 gap-3 items-stretch h-36">
+                            <div className="flex-1 border border-primary/10 p-2.5 rounded bg-black/20 flex flex-col shadow-inner">
+                                <div className="text-[9px] opacity-30 uppercase tracking-[0.2em] mb-1.5 border-b border-primary/5 pb-0.5 font-bold text-center">CORE STATS</div>
+                                <div className="flex-1 flex flex-col justify-center space-y-1">
+                                    <div className="flex justify-between items-center border-b border-primary/5 pb-1 h-7">
+                                        <span className="opacity-40 text-[10px] uppercase font-black">ATK</span>
+                                        <span className="text-game-danger font-black text-sm">{player.attack}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center border-b border-primary/5 pb-1 h-7">
+                                        <span className="opacity-40 text-[10px] uppercase font-black">DEF</span>
+                                        <span className="text-game-info font-black text-sm">{player.defense}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center h-7">
+                                        <span className="opacity-40 text-[10px] uppercase font-black">HP</span>
+                                        <span className="text-game-success font-black text-sm">{Math.ceil(player.hp)}/{player.maxHp}</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="space-y-1">
-                                <div className="text-primary/50 uppercase">Gear</div>
-                                <div className="truncate text-primary">{player.equipped.weapon?.name || '-'}</div>
-                                <div className="truncate text-primary">{player.equipped.armor?.name || '-'}</div>
-                                <div className="truncate text-primary">{player.equipped.accessory?.name || '-'}</div>
+
+                            <div className="flex-1 border border-primary/10 p-2.5 rounded bg-black/20 flex flex-col shadow-inner">
+                                <div className="text-[9px] opacity-30 uppercase tracking-[0.2em] mb-1.5 border-b border-primary/5 pb-0.5 font-bold text-center">EQUIPPED GEAR</div>
+                                <div className="flex-1 flex flex-col justify-center space-y-1">
+                                    <div className="flex justify-between gap-2 border-b border-primary/5 pb-1 h-7 items-center">
+                                        <span className="opacity-40 text-[9px] uppercase font-black">Wpn</span>
+                                        <span className="text-primary font-bold truncate max-w-[75px] text-[11px]">{player.equipped.weapon?.name || '-'}</span>
+                                    </div>
+                                    <div className="flex justify-between gap-2 border-b border-primary/5 pb-1 h-7 items-center">
+                                        <span className="opacity-40 text-[9px] uppercase font-black">Arm</span>
+                                        <span className="text-primary font-bold truncate max-w-[75px] text-[11px]">{player.equipped.armor?.name || '-'}</span>
+                                    </div>
+                                    <div className="flex justify-between gap-2 h-7 items-center">
+                                        <span className="opacity-40 text-[9px] uppercase font-black">Acc</span>
+                                        <span className="text-primary font-bold truncate max-w-[75px] text-[11px]">{player.equipped.accessory?.name || '-'}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div className="space-y-1 mt-2">
-                            <div className="text-primary/50 uppercase text-[10px]">Skills</div>
-                            <div className="grid grid-cols-2 gap-1">
-                                {player.skills.map(s => <div key={s.id} className="border border-primary/20 p-1 text-[9px] text-center rounded">{s.name}</div>)}
+
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                                <span className="opacity-30 uppercase text-[9px]">Skills</span>
+                                <div className="h-px flex-1 bg-primary/10"></div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-1 text-[10px]">
+                                {player.skills.map(s => <div key={s.id} className="border border-primary/10 p-1 text-center rounded bg-primary/5 truncate font-bold">{s.name}</div>)}
                             </div>
                         </div>
-                        <div className="text-center text-[10px] opacity-50 mt-2">[ ESC Back ]</div>
+                        <div className="text-center text-[10px] opacity-30 mt-auto py-2 uppercase tracking-widest">[ ESC ] Close Status</div>
                     </div>
                 )}
 
                 {gameState === 'INVENTORY' && (
-                    <div className="space-y-2 px-2 animate-in fade-in h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20">
-                        <div className="text-center font-bold text-primary border-b border-primary/20 pb-1 mb-2">BACKPACK</div>
+                    <div className="flex flex-col h-full px-2 animate-in fade-in py-1">
+                        <div className="text-sm font-black text-primary mb-3 uppercase tracking-[0.2em] text-center italic">Backpack</div>
                         {player.inventory.map((item, i) => (
-                            <div key={item.id} className="flex justify-between p-1 border-b border-primary/10 hover:bg-white/5 cursor-pointer" onClick={() => equipItem(item)}>
-                                <span className="text-primary text-[10px]">{i + 1}. {item.name}</span>
-                                <span className="text-[9px] opacity-50">{item.type}</span>
+                            <div
+                                key={item.id}
+                                className="flex justify-between items-center p-3 border-b border-primary/5 hover:bg-primary/5 cursor-pointer rounded transition-all group"
+                                onClick={() => equipItem(item)}
+                            >
+                                <div className="flex flex-col">
+                                    <span className="text-primary text-xs font-semibold group-hover:translate-x-1 transition-transform">{i + 1}. {item.name}</span>
+                                    <span className="text-[9px] opacity-30 italic leading-none mt-1">Click to equip</span>
+                                </div>
+                                <span className="text-[9px] opacity-40 uppercase tracking-[0.15em] border border-primary/20 px-1.5 py-0.5 rounded-sm bg-primary/5 font-medium">{item.type}</span>
                             </div>
                         ))}
-                        {player.inventory.length === 0 && <div className="text-center opacity-50 py-4">Empty</div>}
+                        {player.inventory.length === 0 && (
+                            <div className="flex flex-col items-center justify-center h-32 opacity-20 italic">
+                                <ShoppingBag className="mb-2" size={24} />
+                                <div className="text-xs">No items found.</div>
+                            </div>
+                        )}
+                        <div className="text-center text-[10px] opacity-30 mt-auto py-2 uppercase tracking-widest leading-none">[ ESC ] Close Backpack</div>
                     </div>
                 )}
             </div>
 
             {/* Log */}
-            <div className="mt-auto pt-2 border-t border-primary/20 h-16 text-[10px] text-primary/60 font-mono flex flex-col justify-end">
-                {combatLog.map((log, i) => <div key={i} className="truncate select-text">&gt; {log}</div>)}
+            <div className="mt-auto pt-2 border-t border-primary/20 h-16 text-[11px] text-primary/60 font-mono flex flex-col justify-end overflow-hidden">
+                <div className="opacity-20 text-[8px] uppercase tracking-widest mb-1 border-b border-primary/5 w-fit">Event Log</div>
+                {combatLog.slice(-3).map((log, i) => (
+                    <div key={i} className="truncate select-text animate-in slide-in-from-left-1 duration-300">
+                        <span className="opacity-40 mr-2">&gt;</span>{log}
+                    </div>
+                ))}
             </div>
         </div>
     );

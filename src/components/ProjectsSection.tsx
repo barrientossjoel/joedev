@@ -74,13 +74,13 @@ export function ProjectsSection() {
                 </div>
               </div>
 
-              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-6 pt-12 rounded-none sm:rounded-none">
                 <DialogHeader>
                   <DialogTitle className="text-2xl">{title}</DialogTitle>
                   <DialogDescription className="text-sm font-mono">{project.number}</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-6">
-                  <div className="rounded-lg overflow-hidden border border-border">
+                  <div className="rounded-none overflow-hidden border border-border">
                     <img
                       src={getOptimizedUrl(project.image)}
                       alt={title}
@@ -93,7 +93,7 @@ export function ProjectsSection() {
                   {project.link && (
                     <div className="pt-4 flex justify-end">
                       <Button asChild>
-                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-none">
                           {t("projects.visitProject")} <ArrowUpRight size={16} />
                         </a>
                       </Button>

@@ -63,9 +63,9 @@ const BookmarkModalContent = ({ item, activeCategory }: { item: any, activeCateg
   return (
     <div className={`flex flex-col gap-6 ${layout === "side-by-side" ? "md:flex-row" : ""}`}>
       {/* Media Section */}
-      <div className={`${layout === "side-by-side" ? "md:w-1/2 flex items-center justify-center bg-background/50 rounded-lg border border-border/50" : "w-full"}`}>
+      <div className={`${layout === "side-by-side" ? "md:w-1/2 flex items-center justify-center bg-background/50 rounded-none border border-border/50" : "w-full"}`}>
         {item.video ? (
-          <div className="rounded-md overflow-hidden border bg-background w-full">
+          <div className="rounded-none overflow-hidden border bg-background w-full">
             <video
               src={getOptimizedUrl(item.video)}
               className="w-full h-auto max-h-[60vh] object-contain"
@@ -77,7 +77,7 @@ const BookmarkModalContent = ({ item, activeCategory }: { item: any, activeCateg
             />
           </div>
         ) : item.image && (
-          <div className="rounded-md overflow-hidden border bg-background relative group w-full">
+          <div className="rounded-none overflow-hidden border bg-background relative group w-full">
             <img
               src={getOptimizedUrl(item.image)}
               alt={title}
@@ -98,11 +98,11 @@ const BookmarkModalContent = ({ item, activeCategory }: { item: any, activeCateg
         </div>
 
         <div className="grid grid-cols-2 gap-4 text-sm mt-4">
-          <div className="bg-muted/30 p-3 rounded-lg border border-border/50">
+          <div className="bg-muted/30 p-3 rounded-none border border-border/50">
             <span className="text-muted-foreground block text-xs uppercase tracking-wider mb-1">Category</span>
             <span className="font-medium text-foreground">{activeCategory}</span>
           </div>
-          <div className="bg-muted/30 p-3 rounded-lg border border-border/50">
+          <div className="bg-muted/30 p-3 rounded-none border border-border/50">
             <span className="text-muted-foreground block text-xs uppercase tracking-wider mb-1">Saves/Visits</span>
             <span className="font-medium text-foreground">{item.count}</span>
           </div>
@@ -110,7 +110,7 @@ const BookmarkModalContent = ({ item, activeCategory }: { item: any, activeCateg
 
         {item.link && (
           <div className="pt-4 mt-auto">
-            <Button asChild variant="outline" className="w-full h-12 text-base border-primary text-primary hover:bg-primary hover:text-primary-foreground shadow-sm hover:shadow-md transition-all">
+            <Button asChild variant="outline" className="w-full h-12 text-base border-primary text-primary hover:bg-primary hover:text-primary-foreground shadow-sm hover:shadow-md transition-all rounded-none">
               <a href={item.link} target="_blank" rel="noopener noreferrer">
                 Visit Resource <ExternalLink className="ml-2 size-5" />
               </a>
@@ -377,7 +377,7 @@ const BookmarksSection = () => {
                   placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-9 bg-background/50 border-border/50 focus-visible:ring-primary/20 transition-all font-light text-sm"
+                  className="pl-9 h-9 bg-background/50 border-border/50 focus-visible:ring-primary/20 transition-all font-light text-sm rounded-none"
                 />
               </div>
             </div>
@@ -396,7 +396,7 @@ const BookmarksSection = () => {
                     placeholder="Search bookmarks..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 bg-background/50 border-border/50 focus-visible:ring-primary/20 transition-all font-light"
+                    className="pl-9 bg-background/50 border-border/50 focus-visible:ring-primary/20 transition-all font-light rounded-none"
                   />
                 </div>
               </div>
@@ -469,7 +469,7 @@ const BookmarksSection = () => {
                 )}
 
                 <Dialog open={typeof mobileView === 'object' && mobileView?.type === 'detail-modal'} onOpenChange={(open) => !open && setMobileView('detail')}>
-                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6 md:p-8">
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6 pt-12 rounded-none sm:rounded-none">
                     <DialogHeader className="sr-only">
                       <DialogTitle>Bookmark Details</DialogTitle>
                     </DialogHeader>

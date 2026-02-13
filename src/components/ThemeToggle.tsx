@@ -15,7 +15,7 @@ export function ThemeToggle() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="theme-toggle-btn">
+                <Button variant="outline" size="icon" className="theme-toggle-btn rounded-none">
                     <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 theme-retro:scale-0 theme-amber:scale-0" />
                     <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 theme-retro:scale-0 theme-amber:scale-0" />
                     <Terminal className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all theme-retro:rotate-0 theme-retro:scale-100 theme-amber:rotate-0 theme-amber:scale-100 text-[hsl(var(--primary))]" />

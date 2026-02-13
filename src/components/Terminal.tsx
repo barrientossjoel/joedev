@@ -114,7 +114,7 @@ export function Terminal() {
                 className={cn(
                     buttonVariants({ variant: "outline", size: "icon" }),
                     buttonVariants({ variant: "outline", size: "icon" }),
-                    "fixed right-4 z-50 shadow-lg",
+                    "fixed right-4 z-50 shadow-lg rounded-none",
                     isHome ? "bottom-20 md:bottom-4" : "bottom-4"
                 )}
                 aria-label="Open Terminal"
