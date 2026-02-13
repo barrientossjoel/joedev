@@ -48,6 +48,11 @@
   --color-nav-item: var(--nav-item);
   --color-nav-item-active: var(--nav-item-active);
 
+  --color-game-danger: var(--game-danger);
+  --color-game-success: var(--game-success);
+  --color-game-warning: var(--game-warning);
+  --color-game-info: var(--game-info);
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -173,6 +178,11 @@
     --nav-bg: oklch(1 0 0);
     --nav-item: oklch(0.40 0.02 286);
     --nav-item-active: oklch(0.12 0.01 286);
+
+    --game-danger: var(--destructive);
+    --game-success: oklch(0.623 0.187 146.236);
+    --game-warning: oklch(0.795 0.187 86.844);
+    --game-info: oklch(0.623 0.187 246.236);
   }
 
   .dark {
@@ -254,6 +264,11 @@
     --nav-bg: oklch(0.12 0.03 145);
     --nav-item: oklch(0.65 0.08 152);
     --nav-item-active: oklch(0.81 0.11 152);
+
+    --game-danger: oklch(0.60 0.20 25);
+    --game-success: oklch(0.81 0.11 152); /* Keep consistent with retro primary for success? User wants Red for danger though. */
+    --game-warning: oklch(0.85 0.15 90);
+    --game-info: oklch(0.70 0.15 200);
   }
 
 /* ... (rest of file) */
